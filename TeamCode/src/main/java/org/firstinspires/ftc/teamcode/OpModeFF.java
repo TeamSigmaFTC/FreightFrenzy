@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 //Imports stuff we don't get scary red errors
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -10,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 //TeleOp :)
@@ -24,6 +27,9 @@ public class OpModeFF extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
         foreforeArm = hardwareMap.get(DcMotorEx.class, "foreforearm");
         foreArm = hardwareMap.get(DcMotorEx.class, "forearm");
@@ -155,6 +161,11 @@ public class OpModeFF extends LinearOpMode {
             lastIntakeIn = intakeRun;
             lastIntakeOut = outakeRun;
 
+            telemetry.addData("backArm pos", backArm.getCurrentPosition());
+            telemetry.addData("foreArm pos", foreArm.getCurrentPosition());
+            telemetry.addData("foreforearm pos", foreforeArm.getCurrentPosition());
+            telemetry.addData("foreforearm current", foreforeArm.getCurrent(CurrentUnit.MILLIAMPS));
+            telemetry.update();
         }
     }
 }
