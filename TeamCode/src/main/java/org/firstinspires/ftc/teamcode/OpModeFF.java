@@ -66,8 +66,6 @@ public class OpModeFF extends LinearOpMode {
         //While the control program is active, the following will run
         while (opModeIsActive()) {
             // Increasing loop time by utilizing bulk reads and minimizing writes will increase your odometry accuracy
-            drive.update();
-
             BackArmUp = this.gamepad1.y;
             BackArmDown = this.gamepad1.a;
             ForeArmUp = this.gamepad1.dpad_up;
@@ -90,20 +88,25 @@ public class OpModeFF extends LinearOpMode {
                             input.getX(),
                             input.getY(),
                             turning * turning * (turning > 0 ? -1 : 1)));
-            //Arm program :)
+            drive.update();
+
+            //Back arm control program
             boolean backArmUpPress = BackArmUp && !lastBackArmUp;
             boolean backArmUpRelease = !BackArmUp && lastBackArmUp;
             boolean backArmDownPress = BackArmDown && !lastBackArmDown;
             boolean backArmDownRelease = !BackArmDown && lastBackArmDown;
 
             if (backArmUpPress) {
-                //backArm.setVelocity(300);
+                //When backArmUp is pressed, set power to 60%
                 backArm.setPower(0.6);
             } else if (backArmDownPress) {
+                //When backArmDown is pressed, set power to negative 60%
                 backArm.setPower(-0.6);
             } else if (backArmUpRelease || backArmDownRelease) {
+                //If either of the two controls are released, set power to 0%
                 backArm.setPower(0);
             }
+            //Saves button state for the next loop.
             lastBackArmUp = BackArmUp;
             lastBackArmDown = BackArmDown;
 
