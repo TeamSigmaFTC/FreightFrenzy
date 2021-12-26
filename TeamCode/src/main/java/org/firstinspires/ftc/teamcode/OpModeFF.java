@@ -69,6 +69,7 @@ public class OpModeFF extends LinearOpMode {
         boolean outakeRun;
         //backArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+
         //While the control program is active, the following will run
         while (opModeIsActive()) {
             // Increasing loop time by utilizing bulk reads and minimizing writes will increase your odometry accuracy
@@ -131,6 +132,8 @@ public class OpModeFF extends LinearOpMode {
             lastForeArmUp = ForeArmUp;
             lastForeArmDown = ForeArmDown;
 
+
+            //same program, different part of robot
             boolean ffArmUpPress = FFArmUp && !lastFFArmUp;
             boolean ffArmUpRelease = !FFArmUp && lastFFArmUp;
             boolean ffArmDownPress = FFArmDown && !lastFFArmDown;
