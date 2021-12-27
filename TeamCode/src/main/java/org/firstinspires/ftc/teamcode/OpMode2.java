@@ -207,7 +207,7 @@ public class OpMode2 extends LinearOpMode {
                         foreforeArm.setVelocity(0);
                         foreArm.setVelocity(0);
                         currentMode = Mode.INTAKE_ARM_BACK_MOVE_2;
-                        backArm.setTargetPosition(backArmAngleToEncoder(218));
+                        backArm.setTargetPosition(backArmAngleToEncoder(216));
                         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         backArm.setVelocity(1000);
                     }
@@ -248,7 +248,7 @@ public class OpMode2 extends LinearOpMode {
             boolean topPosPress = topPos && !lastTop;
             if (topPosPress) {
                 //Moves arm to a position to deposit the freight in the top level
-                backArm.setTargetPosition(backArmAngleToEncoder(180));
+                backArm.setTargetPosition(backArmAngleToEncoder(150));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 backArm.setVelocity(1000);
                 foreArm.setTargetPosition(foreArmAngleToEncoder(129));
@@ -322,14 +322,17 @@ public class OpMode2 extends LinearOpMode {
             lastBlue = spinBlue;
 
             boolean ffArmUpPress = FFArmUp && !lastFFArmUp;
+            boolean ffArmUpRelease = !FFArmUp && lastFFArmUp;
             boolean ffArmDownPress = FFArmDown && !lastFFArmDown;
+            boolean ffArmDownRelease = !FFArmDown && lastFFArmDown;
+
             if (ffArmUpPress) {
                 foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 foreforeArm.setVelocity(200);
             } else if (ffArmDownPress) {
                 foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 foreforeArm.setVelocity(-200);
-            } else if (eStop) {
+            } else if (ffArmUpRelease||ffArmDownRelease) {
                 foreforeArm.setVelocity(0);
             }
             lastFFArmUp = FFArmUp;
