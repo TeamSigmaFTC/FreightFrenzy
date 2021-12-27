@@ -132,14 +132,15 @@ public class OpMode2 extends LinearOpMode {
         boolean lastCap = false;
         boolean lastRed = false;
         boolean lastBlue = false;
+        boolean lastShared = false;
 
         boolean BackArmDown;
         boolean ForeArmUp;
         boolean ForeArmDown;
         boolean FFArmUp;
         boolean FFArmDown;
-        boolean intakeRun;
-        boolean outakeRun;
+        double intakeRun;
+        double outakeRun;
         boolean pickUpPos;
         boolean topPos;
         boolean midPos;
@@ -147,6 +148,7 @@ public class OpMode2 extends LinearOpMode {
         boolean eStop;
         boolean spinRed;
         boolean spinBlue;
+        boolean sharedPos;
 
 
         //While the control program is active, the following will run
@@ -155,17 +157,18 @@ public class OpMode2 extends LinearOpMode {
             BackArmDown = this.gamepad1.a;
             ForeArmUp = this.gamepad1.dpad_up;
             ForeArmDown = this.gamepad1.dpad_down;
-            FFArmUp = this.gamepad1.dpad_left;
-            FFArmDown = this.gamepad1.dpad_right;
-            intakeRun = this.gamepad1.x;
-            outakeRun = this.gamepad1.b;
-            pickUpPos = this.gamepad1.b; //this.gamepad2.left_bumper;
+            FFArmUp = this.gamepad1.dpad_up;
+            FFArmDown = this.gamepad1.dpad_down;
+            intakeRun = this.gamepad1.left_trigger;
+            outakeRun = this.gamepad1.right_trigger;
+            pickUpPos = this.gamepad1.left_bumper; //this.gamepad2.left_bumper;
             topPos = this.gamepad1.y; //this.gamepad2.right_bumper;
             midPos = this.gamepad1.x; //this.gamepad2.b;
             capPos = this.gamepad1.right_stick_button;
             eStop  = this.gamepad1.left_stick_button;
-            spinRed = this.gamepad1.right_bumper;
-            spinBlue = this.gamepad1.left_bumper;
+            spinRed = this.gamepad1.b;
+            spinBlue = this.gamepad1.right_bumper;
+            sharedPos = this.gamepad1.dpad_right;
 
             //Controls drivetrain
             x = gamepad1.left_stick_x;
@@ -288,6 +291,22 @@ public class OpMode2 extends LinearOpMode {
             }
             lastCap = capPos;
 
+            boolean sharedPosPress = sharedPos && !lastShared;
+            if (sharedPosPress) {
+                //Moves arm to a position to cap the team element
+                backArm.setTargetPosition(backArmAngleToEncoder(180));
+                backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                backArm.setVelocity(1000);
+                foreArm.setTargetPosition(foreArmAngleToEncoder(270));
+                foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                foreArm.setVelocity(1000);
+                foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(90));
+                foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                foreforeArm.setVelocity(200);
+            }
+            lastShared = sharedPos;
+
+
             boolean spinnerRed = spinRed && !lastRed;
             boolean redRelease = !spinRed && lastRed;
             boolean spinnerBlue = spinBlue && !lastBlue;
@@ -301,6 +320,36 @@ public class OpMode2 extends LinearOpMode {
             }
             lastRed = spinRed;
             lastBlue = spinBlue;
+
+            boolean ffArmUpPress = FFArmUp && !lastFFArmUp;
+            boolean ffArmDownPress = FFArmDown && !lastFFArmDown;
+            if (ffArmUpPress) {
+                foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                foreforeArm.setVelocity(200);
+            } else if (ffArmDownPress) {
+                foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                foreforeArm.setVelocity(-200);
+            } else if (eStop) {
+                foreforeArm.setVelocity(0);
+            }
+            lastFFArmUp = FFArmUp;
+            lastFFArmDown = FFArmDown;
+
+
+
+            boolean intakeInPress = intakeRun > 0.1 && !lastIntakeIn;
+            boolean intakeInRelease = intakeRun < 0.1 && lastIntakeIn;
+            boolean intakeOutPress = outakeRun > 0.1 && !lastIntakeOut;
+            boolean intakeOutRelease = outakeRun < 0.1 && lastIntakeOut;
+            if (intakeInPress) {
+                intake.setPower(1);
+            } else if (intakeOutPress) {
+                intake.setPower(-1);
+            } else if (intakeInRelease || intakeOutRelease) {
+                intake.setPower(0);
+            }
+            lastIntakeIn = intakeRun > 0.1;
+            lastIntakeOut = outakeRun > 0.1;
 
             if (eStop) {
                 //if emergency stop
@@ -353,35 +402,7 @@ public class OpMode2 extends LinearOpMode {
 //                lastForeArmDown = ForeArmDown;
 //
 //
-//                boolean ffArmUpPress = FFArmUp && !lastFFArmUp;
-//                boolean ffArmDownPress = FFArmDown && !lastFFArmDown;
-//                if (ffArmUpPress) {
-//                    foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(90));
-//                    foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    foreforeArm.setVelocity(200);
-//                } else if (ffArmDownPress) {
-//                    foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(180));
-//                    foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    foreforeArm.setVelocity(200);
-//                } else if (eStop) {
-//                    foreforeArm.setVelocity(0);
-//                }
-//                lastFFArmUp = FFArmUp;
-//                lastFFArmDown = FFArmDown;
-//
-//                boolean intakeInPress = intakeRun && !lastIntakeIn;
-//                boolean intakeInRelease = !intakeRun && lastIntakeIn;
-//                boolean intakeOutPress = outakeRun && !lastIntakeOut;
-//                boolean intakeOutRelease = !outakeRun && lastIntakeOut;
-//                if (intakeInPress) {
-//                    intake.setPower(1);
-//                } else if (intakeOutPress) {
-//                    intake.setPower(-1);
-//                } else if (intakeInRelease || intakeOutRelease) {
-//                    intake.setPower(0);
-//                }
-//                lastIntakeIn = intakeRun;
-//                lastIntakeOut = outakeRun;
+
 
 
 
