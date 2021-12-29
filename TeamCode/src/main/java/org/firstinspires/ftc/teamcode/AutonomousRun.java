@@ -65,9 +65,9 @@ public class AutonomousRun extends LinearOpMode {
         });
 
         // Only if you are using ftcdashboard
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        telemetry = dashboard.getTelemetry();
-        FtcDashboard.getInstance().startCameraStream(webcam, 10);
+//        FtcDashboard dashboard = FtcDashboard.getInstance();
+//        telemetry = dashboard.getTelemetry();
+//        FtcDashboard.getInstance().startCameraStream(webcam, 10);
 
         waitForStart();
 
