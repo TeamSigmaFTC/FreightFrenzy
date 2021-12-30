@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
 //Imports stuff we don't get scary red errors
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -8,12 +10,19 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+
+import java.util.Locale;
 
 @TeleOp
 public class OpMode2 extends LinearOpMode {
@@ -24,12 +33,17 @@ public class OpMode2 extends LinearOpMode {
     private DcMotorEx backArm;
     private DcMotorEx intake;
     private CRServo spinner;
+    ColorSensor sensorColor;
+    DistanceSensor sensorDistance;
+    TouchSensor magnet;
+
 
     private double BACK_ARM_ENCODER_ANGLE_RATIO = ((((1.0+(46.0/17.0))) * (1.0+(46.0/17.0))) * 28.0) * 28.0 / 360.0;
-    private double BACK_ARM_STARTING_ANGLE = 238;
+    private double BACK_ARM_STARTING_ANGLE = 236;
     // Due to slack, 180 is actually 139, while -180 is actually -221
+
     private double FORE_ARM_ENCODER_ANGLE_RATIO = ((((1.0+(46.0/17.0))) * (1.0+(46.0/17.0))) * 28.0) * 24.0 / 360.0;
-    private double FORE_ARM_STARTING_ANGLE = 24;
+    private double FORE_ARM_STARTING_ANGLE = 23;
     private double FORE_FORE_ARM_ENCODER_ANGLE_RATIO = 2.89 * 3.61 * 3.61 * 28.0 / 360.0;
     private double FORE_FORE_ARM_STARTING_ANGLE = 105;
     public int backArmAngleToEncoder(int degree) {
@@ -93,6 +107,17 @@ public class OpMode2 extends LinearOpMode {
         backArm = hardwareMap.get(DcMotorEx.class, "backarm");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         spinner = hardwareMap.get(CRServo.class, "spinner");
+        sensorColor = hardwareMap.get(ColorSensor.class, "color");
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "color");
+        magnet = hardwareMap.get(TouchSensor.class, "magnet");
+
+        //hsvValues is an array that will hold the hue, saturation, and value information
+        float hsvValues[] = {0F, 0F, 0F};
+
+        //values is a reference to the hsvValues array
+        final float values[] = hsvValues;
+
+
 
         //Sets drivetrain motors up
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
@@ -107,7 +132,6 @@ public class OpMode2 extends LinearOpMode {
         //Shows status on driver control station
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-
 
         //Waits for start
         waitForStart();
@@ -170,6 +194,12 @@ public class OpMode2 extends LinearOpMode {
             spinBlue = this.gamepad1.right_bumper;
             sharedPos = this.gamepad1.dpad_right;
 
+            telemetry.addData("magnet pressed", magnet.isPressed());
+            telemetry.addData("Color v3 Distance (cm)",
+                    String.format(Locale.US, "%.02f", sensorDistance.getDistance(DistanceUnit.CM)));
+            Color.RGBToHSV(sensorColor.red(), sensorColor.green(), sensorColor.blue(), hsvValues);
+            Telemetry.Item item = telemetry.addData("Hue 3", hsvValues[0]);
+
             //Controls drivetrain
             x = gamepad1.left_stick_x;
             y = gamepad1.left_stick_y;
@@ -207,7 +237,7 @@ public class OpMode2 extends LinearOpMode {
                         foreforeArm.setVelocity(0);
                         foreArm.setVelocity(0);
                         currentMode = Mode.INTAKE_ARM_BACK_MOVE_2;
-                        backArm.setTargetPosition(backArmAngleToEncoder(216));
+                        backArm.setTargetPosition(backArmAngleToEncoder(218));
                         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         backArm.setVelocity(1000);
                     }
@@ -218,19 +248,6 @@ public class OpMode2 extends LinearOpMode {
                         currentMode = Mode.NONE;
                     }
                     break;
-//                case INTAKE_ARM_BACK_MOVE_2:
-//                    if (isInPosition(backArm)) {
-//                        backArm.setVelocity(0);
-//                        currentMode = Mode.INTAKE_ARM_FORE_MOVE_2;
-//                        foreArm.setTargetPosition(foreArmAngleToEncoder(-20));
-//                        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                        foreArm.setVelocity(1000);
-//                    }
-//                    break;
-//                case INTAKE_ARM_FORE_MOVE_2:
-//                    foreArm.setVelocity(0);
-//                    currentMode = Mode.NONE;
-//                    break;
             }
             boolean pickUpPress = pickUpPos && !lastPickUp;
             if (pickUpPress) { //backarm to 180 --- foreforearm goes to 270 --- forearm goes to -30 --- once they reach their positions, foreforearm goes to -30 --- once the ff arm gets to its position, backarm move to -210 --- bam done
@@ -305,7 +322,6 @@ public class OpMode2 extends LinearOpMode {
                 foreforeArm.setVelocity(200);
             }
             lastShared = sharedPos;
-
 
             boolean spinnerRed = spinRed && !lastRed;
             boolean redRelease = !spinRed && lastRed;
