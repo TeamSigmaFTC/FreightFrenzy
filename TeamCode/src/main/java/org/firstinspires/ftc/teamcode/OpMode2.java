@@ -117,8 +117,6 @@ public class OpMode2 extends LinearOpMode {
         //values is a reference to the hsvValues array
         final float values[] = hsvValues;
 
-
-
         //Sets drivetrain motors up
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -128,6 +126,10 @@ public class OpMode2 extends LinearOpMode {
         foreArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //foreArm.setTargetPositionTolerance(25);
         foreforeArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        backArm.setCurrentAlert(5, CurrentUnit.AMPS);
+        foreArm.setCurrentAlert(5, CurrentUnit.AMPS);
+        foreforeArm.setCurrentAlert(5, CurrentUnit.AMPS);
 
         //Shows status on driver control station
         telemetry.addData("Status", "Initialized");
@@ -140,7 +142,7 @@ public class OpMode2 extends LinearOpMode {
         double x;
         double y;
         double turning;
-        boolean BackArmUp;
+        float BackArmUp;
         boolean lastBackArmUp = false;
         boolean lastForeArmUp = false;
         boolean lastForeArmDown = false;
@@ -158,8 +160,8 @@ public class OpMode2 extends LinearOpMode {
         boolean lastBlue = false;
         boolean lastShared = false;
 
-        boolean BackArmDown;
-        boolean ForeArmUp;
+        float BackArmDown;
+        float ForeArmUp;
         boolean ForeArmDown;
         boolean FFArmUp;
         boolean FFArmDown;
@@ -177,22 +179,20 @@ public class OpMode2 extends LinearOpMode {
 
         //While the control program is active, the following will run
         while (opModeIsActive()) {
-            BackArmUp = this.gamepad1.y;
-            BackArmDown = this.gamepad1.a;
-            ForeArmUp = this.gamepad1.dpad_up;
-            ForeArmDown = this.gamepad1.dpad_down;
-            FFArmUp = this.gamepad1.dpad_up;
-            FFArmDown = this.gamepad1.dpad_down;
-            intakeRun = this.gamepad1.left_trigger;
-            outakeRun = this.gamepad1.right_trigger;
-            pickUpPos = this.gamepad1.left_bumper; //this.gamepad2.left_bumper;
-            topPos = this.gamepad1.y; //this.gamepad2.right_bumper;
-            midPos = this.gamepad1.x; //this.gamepad2.b;
-            capPos = this.gamepad1.right_stick_button;
+            BackArmUp = gamepad2.left_stick_y;
+            ForeArmUp = this.gamepad2.right_stick_y;
+            FFArmUp = this.gamepad2.dpad_up;
+            FFArmDown = this.gamepad2.dpad_down;
+            intakeRun = this.gamepad2.left_trigger;
+            outakeRun = this.gamepad2.right_trigger;
+            pickUpPos = this.gamepad2.left_bumper; //this.gamepad2.left_bumper;
+            topPos = this.gamepad2.y; //this.gamepad2.right_bumper;
+            midPos = this.gamepad2.x; //this.gamepad2.b;
+            capPos = this.gamepad2.a;
             eStop  = this.gamepad1.left_stick_button;
-            spinRed = this.gamepad1.b;
-            spinBlue = this.gamepad1.right_bumper;
-            sharedPos = this.gamepad1.dpad_right;
+            spinRed = this.gamepad1.a;
+            spinBlue = this.gamepad1.b;
+            sharedPos = this.gamepad2.dpad_right;
 
             telemetry.addData("magnet pressed", magnet.isPressed());
             telemetry.addData("Color v3 Distance (cm)",
@@ -337,24 +337,6 @@ public class OpMode2 extends LinearOpMode {
             lastRed = spinRed;
             lastBlue = spinBlue;
 
-            boolean ffArmUpPress = FFArmUp && !lastFFArmUp;
-            boolean ffArmUpRelease = !FFArmUp && lastFFArmUp;
-            boolean ffArmDownPress = FFArmDown && !lastFFArmDown;
-            boolean ffArmDownRelease = !FFArmDown && lastFFArmDown;
-
-            if (ffArmUpPress) {
-                foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                foreforeArm.setVelocity(200);
-            } else if (ffArmDownPress) {
-                foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                foreforeArm.setVelocity(-200);
-            } else if (ffArmUpRelease||ffArmDownRelease) {
-                foreforeArm.setVelocity(0);
-            }
-            lastFFArmUp = FFArmUp;
-            lastFFArmDown = FFArmDown;
-
-
 
             boolean intakeInPress = intakeRun > 0.1 && !lastIntakeIn;
             boolean intakeInRelease = intakeRun < 0.1 && lastIntakeIn;
@@ -369,6 +351,38 @@ public class OpMode2 extends LinearOpMode {
             }
             lastIntakeIn = intakeRun > 0.1;
             lastIntakeOut = outakeRun > 0.1;
+
+            if (backArm.isOverCurrent()) {
+                backArm.setVelocity(0);
+            } else {
+                backArm.setVelocity(BackArmUp*2000);
+            }
+            if (foreArm.isOverCurrent()) {
+                foreArm.setVelocity(0);
+            } else {
+                foreArm.setVelocity(ForeArmUp*2000);
+            }
+            if (foreforeArm.isOverCurrent()) {
+                foreforeArm.setVelocity(0);
+            } else {
+                boolean ffArmUpPress = FFArmUp && !lastFFArmUp;
+                boolean ffArmUpRelease = !FFArmUp && lastFFArmUp;
+                boolean ffArmDownPress = FFArmDown && !lastFFArmDown;
+                boolean ffArmDownRelease = !FFArmDown && lastFFArmDown;
+
+                if (ffArmUpPress) {
+                    foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    foreforeArm.setVelocity(200);
+                } else if (ffArmDownPress) {
+                    foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    foreforeArm.setVelocity(-200);
+                } else if (ffArmUpRelease||ffArmDownRelease) {
+                    foreforeArm.setVelocity(0);
+                }
+                lastFFArmUp = FFArmUp;
+                lastFFArmDown = FFArmDown;
+            }
+
 
             if (eStop) {
                 //if emergency stop
