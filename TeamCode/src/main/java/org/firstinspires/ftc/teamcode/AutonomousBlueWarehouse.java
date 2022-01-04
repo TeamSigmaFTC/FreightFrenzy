@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -10,7 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -21,7 +19,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Config
 @Autonomous
-public class AutonomousRun extends LinearOpMode {
+public class AutonomousBlueWarehouse extends LinearOpMode {
 
     private DcMotorEx foreforeArm;
     private DcMotorEx foreArm;
@@ -43,16 +41,13 @@ public class AutonomousRun extends LinearOpMode {
 
     private int tsePos = 0;
 
-    protected Pose2d startPose = new Pose2d(-36, 63, Math.toRadians(-90));
-    public static double SPINNER_X = -57;
-    public static double SPINNER_Y = 58;
-    public static double SPINNER_ANGLE = -180;
-    public static double SHIPPING_HUB_X = -36;
-    public static double SHIPPING_HUB_Y = 48;
-    public static double SHIPPING_HUB_ANGLE = -45;
-    public static double STORAGE_X = -60;
-    public static double STORAGE_Y = 36;
-    public static double STORAGE_ANGLE = -180;
+    protected Pose2d startPose = new Pose2d(12, 63, Math.toRadians(-90));
+    public static double SHIPPING_HUB_X = 12;
+    public static double SHIPPING_HUB_Y = 49;
+    public static double SHIPPING_HUB_ANGLE = 45;
+    public static double WAREHOUSE_X = 42;
+    public static double WAREHOUSE_Y = 63.5;
+    public static double WAREHOUSE_ANGLE = 0;
 
     // Green Range                                      Y      Cr     Cb
     public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
@@ -108,14 +103,16 @@ public class AutonomousRun extends LinearOpMode {
         drive.setPoseEstimate(startPose);
 
         Trajectory traj1 = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(SPINNER_X, SPINNER_Y), Math.toRadians(SPINNER_ANGLE))
-                .build();
-        Trajectory traj2 = drive.trajectoryBuilder(traj1.end(), true)
                 .splineTo(new Vector2d(SHIPPING_HUB_X, SHIPPING_HUB_Y), Math.toRadians(SHIPPING_HUB_ANGLE))
                 .build();
-        Trajectory traj3 = drive.trajectoryBuilder(traj2.end(), true)
-                .splineTo(new Vector2d(STORAGE_X, STORAGE_Y), Math.toRadians(STORAGE_ANGLE))
+        Trajectory traj2 = drive.trajectoryBuilder(traj1.end())
+                .splineTo(new Vector2d(12,63), Math.toRadians(0))
                 .build();
+        Trajectory traj3 = drive.trajectoryBuilder(traj2.end())
+                .strafeLeft(2)
+                .splineTo(new Vector2d(WAREHOUSE_X, WAREHOUSE_Y), Math.toRadians(WAREHOUSE_ANGLE))
+                .build();
+
 
         waitForStart();
         if (isStopRequested()) return;
@@ -149,21 +146,14 @@ public class AutonomousRun extends LinearOpMode {
         }
         telemetry.update();
 
-        //drive to carousel and spin.
-        drive.followTrajectory(traj1);
-        spinner.setPower(1);
-        sleep(3000);
-        spinner.setPower(0);
-
         //drive to TSH and drop freight
-        drive.followTrajectory(traj2);
-
+        drive.followTrajectory(traj1);
         int backArmDegree;
         int foreArmDegree;
         int foreforeArmDumpDegree;
         if (tsePos == 1) {
-            backArmDegree = 180;
-            foreArmDegree = 200;
+            backArmDegree = 170;
+            foreArmDegree = 210;
             foreforeArmDumpDegree = 180;
             //bottom
         }else if (tsePos == 2){
@@ -229,6 +219,7 @@ public class AutonomousRun extends LinearOpMode {
         foreArm.setVelocity(0);
 
         //park
+        drive.followTrajectory(traj2);
         drive.followTrajectory(traj3);
 
     }

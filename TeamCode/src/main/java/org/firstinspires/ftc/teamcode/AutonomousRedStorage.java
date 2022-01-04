@@ -21,7 +21,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Config
 @Autonomous
-public class AutonomousRun extends LinearOpMode {
+public class AutonomousRedStorage extends LinearOpMode {
 
     private DcMotorEx foreforeArm;
     private DcMotorEx foreArm;
@@ -43,16 +43,16 @@ public class AutonomousRun extends LinearOpMode {
 
     private int tsePos = 0;
 
-    protected Pose2d startPose = new Pose2d(-36, 63, Math.toRadians(-90));
-    public static double SPINNER_X = -57;
-    public static double SPINNER_Y = 58;
-    public static double SPINNER_ANGLE = -180;
+    protected Pose2d startPose = new Pose2d(-36, -63, Math.toRadians(90));
+    public static double SPINNER_X = -60;
+    public static double SPINNER_Y = -56;
+    public static double SPINNER_ANGLE = 270;
     public static double SHIPPING_HUB_X = -36;
-    public static double SHIPPING_HUB_Y = 48;
-    public static double SHIPPING_HUB_ANGLE = -45;
+    public static double SHIPPING_HUB_Y = -48;
+    public static double SHIPPING_HUB_ANGLE = 45;
     public static double STORAGE_X = -60;
-    public static double STORAGE_Y = 36;
-    public static double STORAGE_ANGLE = -180;
+    public static double STORAGE_Y = -34;
+    public static double STORAGE_ANGLE = 0;
 
     // Green Range                                      Y      Cr     Cb
     public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
@@ -113,9 +113,11 @@ public class AutonomousRun extends LinearOpMode {
         Trajectory traj2 = drive.trajectoryBuilder(traj1.end(), true)
                 .splineTo(new Vector2d(SHIPPING_HUB_X, SHIPPING_HUB_Y), Math.toRadians(SHIPPING_HUB_ANGLE))
                 .build();
-        Trajectory traj3 = drive.trajectoryBuilder(traj2.end(), true)
+        Trajectory traj3 = drive.trajectoryBuilder(traj2.end())
+                .splineTo(new Vector2d(-48,-54 ), Math.toRadians(90))
                 .splineTo(new Vector2d(STORAGE_X, STORAGE_Y), Math.toRadians(STORAGE_ANGLE))
                 .build();
+
 
         waitForStart();
         if (isStopRequested()) return;
@@ -151,7 +153,7 @@ public class AutonomousRun extends LinearOpMode {
 
         //drive to carousel and spin.
         drive.followTrajectory(traj1);
-        spinner.setPower(1);
+        spinner.setPower(-1);
         sleep(3000);
         spinner.setPower(0);
 

@@ -37,7 +37,6 @@ public class OpMode2 extends LinearOpMode {
     DistanceSensor sensorDistance;
     TouchSensor magnet;
 
-
     private double BACK_ARM_ENCODER_ANGLE_RATIO = ((((1.0+(46.0/17.0))) * (1.0+(46.0/17.0))) * 28.0) * 28.0 / 360.0;
     private double BACK_ARM_STARTING_ANGLE = 236;
     // Due to slack, 180 is actually 139, while -180 is actually -221
@@ -230,6 +229,7 @@ public class OpMode2 extends LinearOpMode {
                         foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(-17));
                         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         foreforeArm.setVelocity(300);
+
                     }
                     break;
                 case INTAKE_ARM_FORE_MOVE:
