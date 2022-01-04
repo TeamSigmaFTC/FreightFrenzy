@@ -203,9 +203,9 @@ public class ContourPipeline extends OpenCvPipeline {
         }
     }
 
-    public double getAspectRatio() {
+    public double getCameraWidth() {
         synchronized (sync) {
-            return getRectArea() / (CAMERA_HEIGHT * CAMERA_WIDTH);
+            return CAMERA_WIDTH;
         }
     }
 
