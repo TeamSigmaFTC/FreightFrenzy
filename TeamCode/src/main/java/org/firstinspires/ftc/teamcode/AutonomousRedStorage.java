@@ -170,8 +170,8 @@ public class AutonomousRedStorage extends LinearOpMode {
             //bottom
         }else if (tsePos == 2){
             backArmDegree = 180;
-            foreArmDegree = 169;
-            foreforeArmDumpDegree = 180;
+            foreArmDegree = 175;
+            foreforeArmDumpDegree = 170;
             //mid
         }else {
             backArmDegree = 150;

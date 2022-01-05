@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -10,7 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -21,7 +19,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Config
 @Autonomous
-public class AutonomousRun extends LinearOpMode {
+public class AutonomousRemote extends LinearOpMode {
 
     private DcMotorEx foreforeArm;
     private DcMotorEx foreArm;
@@ -50,9 +48,12 @@ public class AutonomousRun extends LinearOpMode {
     public static double SHIPPING_HUB_X = -36;
     public static double SHIPPING_HUB_Y = 48;
     public static double SHIPPING_HUB_ANGLE = -45;
-    public static double STORAGE_X = -60;
-    public static double STORAGE_Y = 36;
-    public static double STORAGE_ANGLE = -180;
+    public static double TRANSITION_X = 0;
+    public static double TRANSITION_Y = 65;
+    public static double TRANSITION_ANGLE = 0;
+    public static double WAREHOUSE_X = 42;
+    public static double WAREHOUSE_Y = 65;
+    public static double WAREHOUSE_ANGLE =0;
 
     // Green Range                                      Y      Cr     Cb
     public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
@@ -113,8 +114,11 @@ public class AutonomousRun extends LinearOpMode {
         Trajectory traj2 = drive.trajectoryBuilder(traj1.end(), true)
                 .splineTo(new Vector2d(SHIPPING_HUB_X, SHIPPING_HUB_Y), Math.toRadians(SHIPPING_HUB_ANGLE))
                 .build();
-        Trajectory traj3 = drive.trajectoryBuilder(traj2.end(), true)
-                .splineTo(new Vector2d(STORAGE_X, STORAGE_Y), Math.toRadians(STORAGE_ANGLE))
+        Trajectory traj3 = drive.trajectoryBuilder(traj2.end())
+                .splineTo(new Vector2d(TRANSITION_X, TRANSITION_Y), Math.toRadians(TRANSITION_ANGLE))
+                .splineTo(new Vector2d(WAREHOUSE_X, WAREHOUSE_Y), Math.toRadians(WAREHOUSE_ANGLE))
+                .build();
+        Trajectory traj4 = drive.trajectoryBuilder(traj3.end())
                 .build();
 
         waitForStart();
