@@ -126,8 +126,8 @@ public class OpMode2 extends LinearOpMode {
         //foreArm.setTargetPositionTolerance(25);
         foreforeArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        backArm.setCurrentAlert(5, CurrentUnit.AMPS);
-        foreArm.setCurrentAlert(5, CurrentUnit.AMPS);
+        backArm.setCurrentAlert(6, CurrentUnit.AMPS);
+        foreArm.setCurrentAlert(6, CurrentUnit.AMPS);
         foreforeArm.setCurrentAlert(5, CurrentUnit.AMPS);
 
         //Shows status on driver control station
@@ -142,8 +142,7 @@ public class OpMode2 extends LinearOpMode {
         double y;
         double turning;
         float BackArmUp;
-        boolean lastBackArmUp = false;
-        boolean lastForeArmUp = false;
+        float lastBackArmUp = 0;
         boolean lastForeArmDown = false;
         boolean lastBackArmDown = false;
         boolean lastFFArmUp = false;
@@ -161,6 +160,7 @@ public class OpMode2 extends LinearOpMode {
 
         float BackArmDown;
         float ForeArmUp;
+        float lastForeArmUp = 0;
         boolean ForeArmDown;
         boolean FFArmUp;
         boolean FFArmDown;
@@ -178,7 +178,7 @@ public class OpMode2 extends LinearOpMode {
 
         //While the control program is active, the following will run
         while (opModeIsActive()) {
-            BackArmUp = gamepad2.left_stick_y;
+            BackArmUp = -gamepad2.left_stick_y;
             ForeArmUp = this.gamepad2.right_stick_y;
             FFArmUp = this.gamepad2.dpad_up;
             FFArmDown = this.gamepad2.dpad_down;
@@ -188,7 +188,7 @@ public class OpMode2 extends LinearOpMode {
             topPos = this.gamepad2.y; //this.gamepad2.right_bumper;
             midPos = this.gamepad2.x; //this.gamepad2.b;
             capPos = this.gamepad2.a;
-            eStop  = this.gamepad1.left_stick_button;
+            eStop  = this.gamepad2.right_stick_button;
             spinRed = this.gamepad1.a;
             spinBlue = this.gamepad1.b;
             sharedPos = this.gamepad2.dpad_right;
@@ -355,12 +355,26 @@ public class OpMode2 extends LinearOpMode {
             if (backArm.isOverCurrent()) {
                 backArm.setVelocity(0);
             } else {
-                backArm.setVelocity(BackArmUp*2000);
+                boolean backArmMoved = Math.abs(BackArmUp - lastBackArmUp) > 0.05;
+                if(backArmMoved) {
+                    backArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    backArm.setVelocity(BackArmUp * 2000);
+                } else if (Math.abs(BackArmUp) < 0.01 && Math.abs(lastBackArmUp) > 0.01) {
+                    backArm.setVelocity(0);
+                }
+                lastBackArmUp = BackArmUp;
             }
             if (foreArm.isOverCurrent()) {
                 foreArm.setVelocity(0);
             } else {
-                foreArm.setVelocity(ForeArmUp*2000);
+                boolean foreArmMoved = Math.abs(ForeArmUp - lastForeArmUp) > 0.05;
+                if(foreArmMoved) {
+                    foreArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    foreArm.setVelocity(ForeArmUp * 2000);
+                } else if (Math.abs(ForeArmUp) < 0.01 && Math.abs(lastForeArmUp) > 0.01) {
+                    foreArm.setVelocity(0);
+                }
+                lastForeArmUp = ForeArmUp;
             }
             if (foreforeArm.isOverCurrent()) {
                 foreforeArm.setVelocity(0);
@@ -372,11 +386,11 @@ public class OpMode2 extends LinearOpMode {
 
                 if (ffArmUpPress) {
                     foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    foreforeArm.setVelocity(200);
+                    foreforeArm.setVelocity(300);
                 } else if (ffArmDownPress) {
                     foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    foreforeArm.setVelocity(-200);
-                } else if (ffArmUpRelease||ffArmDownRelease) {
+                    foreforeArm.setVelocity(-300);
+                } else if (ffArmUpRelease || ffArmDownRelease) {
                     foreforeArm.setVelocity(0);
                 }
                 lastFFArmUp = FFArmUp;
@@ -391,53 +405,6 @@ public class OpMode2 extends LinearOpMode {
                 foreforeArm.setVelocity(0);
                 currentMode = Mode.NONE;
             }
-
-            //Test Program
-
-            //Checks if button is pressed, and if the button was pressed in the last loop
-//                boolean backArmUpPress = BackArmUp && !lastBackArmUp;
-//                boolean backArmDownPress = BackArmDown && !lastBackArmDown;
-//
-//                //Back arm control program
-//                if (backArmUpPress) {
-//                    //When backArmUp is pressed, set power to 60%
-//                    backArm.setTargetPosition(backArmAngleToEncoder(90));
-//                    backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    backArm.setVelocity(1000);
-//                } else if (backArmDownPress) {
-//                    //When backArmDown is pressed, set power to negative 60%
-//                    backArm.setTargetPosition(backArmAngleToEncoder(180));
-//                    backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    backArm.setVelocity(1000);
-//                } else if (eStop) {
-//                    //If either of the two controls are released, set power to 0%
-//                    backArm.setVelocity(0);
-//                }
-//                //Saves button state for the next loop.
-//                lastBackArmUp = BackArmUp;
-//                lastBackArmDown = BackArmDown;
-//
-//                //Same program as the one above, just a different arm
-//                boolean foreArmUpPress = ForeArmUp && !lastForeArmUp;
-//                boolean foreArmDownPress = ForeArmDown && !lastForeArmDown;
-//                if (foreArmUpPress) {
-//                    foreArm.setTargetPosition(foreArmAngleToEncoder(90));
-//                    foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    foreArm.setVelocity(1000);
-//                } else if (foreArmDownPress) {
-//                    foreArm.setTargetPosition(foreArmAngleToEncoder(180));
-//                    foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                    foreArm.setVelocity(1000);
-//                } else if (eStop) {
-//                    foreArm.setVelocity(0);
-//                }
-//                lastForeArmUp = ForeArmUp;
-//                lastForeArmDown = ForeArmDown;
-//
-//
-
-
-
 
             //Prints out information on the driver control station screen for puny humans
             telemetry.addData("estop", eStop);

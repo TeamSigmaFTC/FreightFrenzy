@@ -56,6 +56,11 @@ public class TestCameraOpMode extends OpMode
         field.strokeLine(x1, y1, x2, y2);
 
         dashboard.sendTelemetryPacket(packet);
+        telemetry.addData("x", translation.getX());
+        telemetry.addData("y", translation.getY());
+        telemetry.addData("h", rotation.getDegrees());
+        telemetry.addData("c", up.confidence.toString());
+        telemetry.update();
     }
 
     @Override
