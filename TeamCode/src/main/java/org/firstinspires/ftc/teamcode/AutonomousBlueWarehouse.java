@@ -42,11 +42,21 @@ public class AutonomousBlueWarehouse extends LinearOpMode {
     private int tsePos = 0;
 
     protected Pose2d startPose = new Pose2d(12, 63, Math.toRadians(-90));
+
     public static double SHIPPING_HUB_X = 12;
     public static double SHIPPING_HUB_Y = 49;
     public static double SHIPPING_HUB_ANGLE = 45;
+
+    public static double TRANSITION1_X = -9;
+    public static double TRANSITION1_Y = 60;
+    public static double TRANSITION1_ANGLE = 180;
+
+    public static double TRANSITION2_X = 16;
+    public static double TRANSITION2_Y = 65;
+    public static double TRANSITION2_ANGLE = 0;
+
     public static double WAREHOUSE_X = 42;
-    public static double WAREHOUSE_Y = 63.5;
+    public static double WAREHOUSE_Y = 65;
     public static double WAREHOUSE_ANGLE = 0;
 
     // Green Range                                      Y      Cr     Cb
@@ -105,14 +115,13 @@ public class AutonomousBlueWarehouse extends LinearOpMode {
         Trajectory traj1 = drive.trajectoryBuilder(startPose)
                 .splineTo(new Vector2d(SHIPPING_HUB_X, SHIPPING_HUB_Y), Math.toRadians(SHIPPING_HUB_ANGLE))
                 .build();
-        Trajectory traj2 = drive.trajectoryBuilder(traj1.end())
-                .splineTo(new Vector2d(12,63), Math.toRadians(0))
+        Trajectory traj2 = drive.trajectoryBuilder(traj1.end(), true)
+                .splineTo(new Vector2d(TRANSITION1_X, TRANSITION1_Y), Math.toRadians(TRANSITION1_ANGLE))
                 .build();
         Trajectory traj3 = drive.trajectoryBuilder(traj2.end())
-                .strafeLeft(2)
+                .splineTo(new Vector2d(TRANSITION2_X, TRANSITION2_Y), Math.toRadians(TRANSITION2_ANGLE))
                 .splineTo(new Vector2d(WAREHOUSE_X, WAREHOUSE_Y), Math.toRadians(WAREHOUSE_ANGLE))
                 .build();
-
 
         waitForStart();
         if (isStopRequested()) return;
