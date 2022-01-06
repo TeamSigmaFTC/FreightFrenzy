@@ -208,30 +208,63 @@ public class AutonomousRemote extends LinearOpMode {
             sleep(50);
         }
         //put arm back in
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder((int) Common.FORE_FORE_ARM_STARTING_ANGLE));
+//        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder((int) Common.FORE_FORE_ARM_STARTING_ANGLE));
+//        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        foreforeArm.setVelocity(300);
+//
+//        while (!Common.isInPosition(foreforeArm)){
+//            sleep(50);
+//        }
+//        foreforeArm.setVelocity(0);
+//        foreArm.setTargetPosition(Common.foreArmAngleToEncoder((int) Common.FORE_ARM_STARTING_ANGLE));
+//        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        foreArm.setVelocity(2000);
+//
+//        backArm.setTargetPosition(Common.backArmAngleToEncoder((int) Common.BACK_ARM_STARTING_ANGLE));
+//        backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        backArm.setVelocity(1000);
+//        while (!Common.isInPosition(backArm)){
+//            sleep(50);
+//        }
+//        backArm.setVelocity(0);
+//        while (!Common.isInPosition(foreArm)){
+//            sleep(50);
+//        }
+//        foreArm.setVelocity(0);
+
+        //new put arm back in
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(-17));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(300);
-
         while (!Common.isInPosition(foreforeArm)){
             sleep(50);
         }
         foreforeArm.setVelocity(0);
-        foreArm.setTargetPosition(Common.foreArmAngleToEncoder((int) Common.FORE_ARM_STARTING_ANGLE));
-        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(2000);
-
-        backArm.setTargetPosition(Common.backArmAngleToEncoder((int) Common.BACK_ARM_STARTING_ANGLE));
+        backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backArm.setVelocity(1000);
         while (!Common.isInPosition(backArm)){
             sleep(50);
         }
+
+        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(325));
+        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        foreArm.setVelocity(2000);
+//        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(-17));
+//        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        foreforeArm.setVelocity(300);
         backArm.setVelocity(0);
         while (!Common.isInPosition(foreArm)){
             sleep(50);
         }
         foreArm.setVelocity(0);
-
+//        while (!Common.isInPosition(foreforeArm)){
+//            sleep(50);
+//        }
+//        foreforeArm.setVelocity(0);
+        backArm.setTargetPosition(Common.backArmAngleToEncoder(218));
+        backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backArm.setVelocity(1000);
         //park
         drive.followTrajectory(traj3);
 
