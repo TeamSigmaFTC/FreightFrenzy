@@ -180,15 +180,15 @@ public class OpMode2 extends LinearOpMode {
         while (opModeIsActive()) {
             BackArmUp = -gamepad2.left_stick_y;
             ForeArmUp = this.gamepad2.right_stick_y;
-            FFArmUp = this.gamepad2.dpad_up;
-            FFArmDown = this.gamepad2.dpad_down;
-            intakeRun = this.gamepad2.left_trigger;
-            outakeRun = this.gamepad2.right_trigger;
-            pickUpPos = this.gamepad2.left_bumper; //this.gamepad2.left_bumper;
-            topPos = this.gamepad2.y; //this.gamepad2.right_bumper;
-            midPos = this.gamepad2.x; //this.gamepad2.b;
-            capPos = this.gamepad2.a;
-            eStop  = this.gamepad2.right_stick_button;
+            FFArmDown = this.gamepad2.dpad_up;
+            FFArmUp = this.gamepad2.dpad_down;
+            intakeRun = this.gamepad1.left_trigger;
+            outakeRun = this.gamepad1.right_trigger;
+            pickUpPos = this.gamepad2.b; //this.gamepad2.left_bumper;
+            topPos = this.gamepad2.x; //this.gamepad2.right_bumper;
+            midPos = this.gamepad2.y; //this.gamepad2.b;
+            capPos = this.gamepad2.left_bumper;
+            eStop  = this.gamepad1.left_stick_button;
             spinRed = this.gamepad1.a;
             spinBlue = this.gamepad1.b;
             sharedPos = this.gamepad2.dpad_right;
@@ -205,7 +205,7 @@ public class OpMode2 extends LinearOpMode {
             Vector2d input = new Vector2d(
                     //Squares power, to allow for more precise robot control
                     y * y * (y > 0 ? -1 : 1),
-                    x * x * (x > 0 ? -1 : 1));
+                    x * x * (x > 0 ? -1 : 1)).rotated(-drive.getPoseEstimate().getHeading());
 
             turning = gamepad1.right_stick_x;
             drive.setWeightedDrivePower(
@@ -223,9 +223,9 @@ public class OpMode2 extends LinearOpMode {
                     if (isInPosition(backArm)) {
                         backArm.setVelocity(0);
                         currentMode = Mode.INTAKE_ARM_FORE_MOVE;
-                        foreArm.setTargetPosition(foreArmAngleToEncoder(325));
+                        foreArm.setTargetPosition(foreArmAngleToEncoder(315));
                         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        foreArm.setVelocity(2000);
+                        foreArm.setVelocity(3000);
                         foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(-17));
                         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         foreforeArm.setVelocity(300);
@@ -235,11 +235,13 @@ public class OpMode2 extends LinearOpMode {
                 case INTAKE_ARM_FORE_MOVE:
                     if (isInPosition(foreforeArm) && isInPosition(foreArm)) {
                         foreforeArm.setVelocity(0);
-                        foreArm.setVelocity(0);
                         currentMode = Mode.INTAKE_ARM_BACK_MOVE_2;
+                        foreArm.setTargetPosition(foreArmAngleToEncoder(325));
+                        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        foreArm.setVelocity(3000);
                         backArm.setTargetPosition(backArmAngleToEncoder(218));
                         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        backArm.setVelocity(1000);
+                        backArm.setVelocity(2000);
                     }
                     break;
                 case INTAKE_ARM_BACK_MOVE_2:
@@ -256,7 +258,7 @@ public class OpMode2 extends LinearOpMode {
                 currentMode = Mode.INTAKE_ARM_BACK_MOVE;
                 backArm.setTargetPosition(backArmAngleToEncoder(180));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                backArm.setVelocity(1000);
+                backArm.setVelocity(2000);
             }
             //Saves button state for the next loop.
             lastPickUp = pickUpPress;
@@ -267,10 +269,10 @@ public class OpMode2 extends LinearOpMode {
                 //Moves arm to a position to deposit the freight in the top level
                 backArm.setTargetPosition(backArmAngleToEncoder(150));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                backArm.setVelocity(1000);
+                backArm.setVelocity(2000);
                 foreArm.setTargetPosition(foreArmAngleToEncoder(129));
                 foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreArm.setVelocity(1000);
+                foreArm.setVelocity(2000);
                 foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(90));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 foreforeArm.setVelocity(200);
@@ -283,13 +285,13 @@ public class OpMode2 extends LinearOpMode {
                 //Moves arm to a position to deposit the freight in the middle level
                 backArm.setTargetPosition(backArmAngleToEncoder(180));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                backArm.setVelocity(1000);
+                backArm.setVelocity(2000);
                 foreArm.setTargetPosition(foreArmAngleToEncoder(145));
                 foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreArm.setVelocity(1000);
+                foreArm.setVelocity(2000);
                 foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(90));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreforeArm.setVelocity(200);
+                foreforeArm.setVelocity(400);
             }
             lastMid = midPos;
 
@@ -298,13 +300,13 @@ public class OpMode2 extends LinearOpMode {
                 //Moves arm to a position to cap the team element
                 backArm.setTargetPosition(backArmAngleToEncoder(100));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                backArm.setVelocity(1000);
+                backArm.setVelocity(2000);
                 foreArm.setTargetPosition(foreArmAngleToEncoder(150));
                 foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreArm.setVelocity(1000);
+                foreArm.setVelocity(2000);
                 foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(90));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreforeArm.setVelocity(200);
+                foreforeArm.setVelocity(400);
             }
             lastCap = capPos;
 
@@ -313,13 +315,13 @@ public class OpMode2 extends LinearOpMode {
                 //Moves arm to a position to cap the team element
                 backArm.setTargetPosition(backArmAngleToEncoder(180));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                backArm.setVelocity(1000);
+                backArm.setVelocity(2000);
                 foreArm.setTargetPosition(foreArmAngleToEncoder(270));
                 foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreArm.setVelocity(1000);
+                foreArm.setVelocity(2000);
                 foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(90));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreforeArm.setVelocity(200);
+                foreforeArm.setVelocity(400);
             }
             lastShared = sharedPos;
 
@@ -386,10 +388,10 @@ public class OpMode2 extends LinearOpMode {
 
                 if (ffArmUpPress) {
                     foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    foreforeArm.setVelocity(300);
+                    foreforeArm.setVelocity(400);
                 } else if (ffArmDownPress) {
                     foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    foreforeArm.setVelocity(-300);
+                    foreforeArm.setVelocity(-400);
                 } else if (ffArmUpRelease || ffArmDownRelease) {
                     foreforeArm.setVelocity(0);
                 }
