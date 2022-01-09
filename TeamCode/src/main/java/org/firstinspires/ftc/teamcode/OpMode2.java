@@ -7,12 +7,14 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
@@ -36,6 +38,9 @@ public class OpMode2 extends LinearOpMode {
     ColorSensor sensorColor;
     DistanceSensor sensorDistance;
     TouchSensor magnet;
+    DigitalChannel redLED1;
+    DigitalChannel greenLED1;
+    RevBlinkinLedDriver blinkinLedDriver;
 
     private double BACK_ARM_ENCODER_ANGLE_RATIO = ((((1.0+(46.0/17.0))) * (1.0+(46.0/17.0))) * 28.0) * 28.0 / 360.0;
     private double BACK_ARM_STARTING_ANGLE = 236;
@@ -109,6 +114,9 @@ public class OpMode2 extends LinearOpMode {
         sensorColor = hardwareMap.get(ColorSensor.class, "color");
         sensorDistance = hardwareMap.get(DistanceSensor.class, "color");
         magnet = hardwareMap.get(TouchSensor.class, "magnet");
+        redLED1 = hardwareMap.get(DigitalChannel.class, "red1");
+        greenLED1 = hardwareMap.get(DigitalChannel.class, "green1");
+        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
 
         //hsvValues is an array that will hold the hue, saturation, and value information
         float hsvValues[] = {0F, 0F, 0F};
@@ -136,6 +144,10 @@ public class OpMode2 extends LinearOpMode {
 
         //Waits for start
         waitForStart();
+
+        // change LED mode from input to output
+        redLED1.setMode(DigitalChannel.Mode.OUTPUT);
+        greenLED1.setMode(DigitalChannel.Mode.OUTPUT);
 
         //Sets some values
         double x;
@@ -193,11 +205,39 @@ public class OpMode2 extends LinearOpMode {
             spinBlue = this.gamepad1.b;
             sharedPos = this.gamepad2.dpad_right;
 
-            telemetry.addData("magnet pressed", magnet.isPressed());
+//            telemetry.addData("magnet pressed", magnet.isPressed());
+            double distance = sensorDistance.getDistance(DistanceUnit.CM);
             telemetry.addData("Color v3 Distance (cm)",
-                    String.format(Locale.US, "%.02f", sensorDistance.getDistance(DistanceUnit.CM)));
+                    String.format(Locale.US, "%.03f", distance));
             Color.RGBToHSV(sensorColor.red(), sensorColor.green(), sensorColor.blue(), hsvValues);
-            Telemetry.Item item = telemetry.addData("Hue 3", hsvValues[0]);
+            float hue = hsvValues[0];
+            telemetry.addData("Hue", hue);
+            if (distance < 6.1 && distance > 4 && hue > 140 && hue < 170) {
+                // if the sensor is looking through the hole on the basket, show green.
+                redLED1.setState(false);
+                greenLED1.setState(true);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+            } else if (hue > 140 && hue < 148 && distance < 0.85) {
+                // color green and very close to the sensor, show red color on the led
+                redLED1.setState(true);
+                greenLED1.setState(false);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+            } else if (hue < 140 && hue > 75 && distance < 4) {
+                //show amber if the detected color is yellow-ish
+                redLED1.setState(false);
+                greenLED1.setState(false);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+            } else if (hue > 154 && hue < 165 && distance < 3) {
+                //show amber if the detected color is white-ish
+                redLED1.setState(false);
+                greenLED1.setState(false);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.WHITE);
+            } else {
+                // turn led off
+                redLED1.setState(true);
+                greenLED1.setState(true);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+            }
 
             //Controls drivetrain
             x = gamepad1.left_stick_x;

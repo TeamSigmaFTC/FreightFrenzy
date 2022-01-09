@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -24,6 +25,7 @@ public class AutonomousRemote extends LinearOpMode {
     private DcMotorEx foreforeArm;
     private DcMotorEx foreArm;
     private DcMotorEx backArm;
+    private TouchSensor magnet;
 
     private OpenCvCamera webcam;
     private ContourPipeline pipeline;
@@ -53,21 +55,22 @@ public class AutonomousRemote extends LinearOpMode {
     public static double TRANSITION_ANGLE = 0;
     public static double WAREHOUSE_X = 42;
     public static double WAREHOUSE_Y = 65;
-    public static double WAREHOUSE_ANGLE =0;
+    public static double WAREHOUSE_ANGLE = 0;
 
     // Green Range                                      Y      Cr     Cb
     public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
     public static Scalar scalarUpperYCrCb = new Scalar(255.0, 120.0, 120.0);
 
 
-
     @Override
     public void runOpMode() throws InterruptedException {
 
+        magnet = hardwareMap.get(TouchSensor.class, "magnet");
         spinner = hardwareMap.get(CRServo.class, "spinner");
         foreforeArm = hardwareMap.get(DcMotorEx.class, "foreforearm");
         foreArm = hardwareMap.get(DcMotorEx.class, "forearm");
         backArm = hardwareMap.get(DcMotorEx.class, "backarm");
+
         backArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //backArm.setTargetPositionTolerance(25);
         foreArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -121,7 +124,14 @@ public class AutonomousRemote extends LinearOpMode {
         Trajectory traj4 = drive.trajectoryBuilder(traj3.end())
                 .build();
 
+        if(magnet.isPressed()) {
+            telemetry.addData("Initialized", "Arms in right position");
+        } else {
+            telemetry.addData("WARNING", "Arms NOT in position!");
+        }
+        telemetry.update();
         waitForStart();
+
         if (isStopRequested()) return;
         //getRuntime() < 2
         while (true) {
@@ -170,12 +180,12 @@ public class AutonomousRemote extends LinearOpMode {
             foreArmDegree = 200;
             foreforeArmDumpDegree = 180;
             //bottom
-        }else if (tsePos == 2){
+        } else if (tsePos == 2) {
             backArmDegree = 180;
             foreArmDegree = 175;
             foreforeArmDumpDegree = 170;
             //mid
-        }else {
+        } else {
             backArmDegree = 150;
             foreArmDegree = 129;
             foreforeArmDumpDegree = 218;
@@ -190,21 +200,21 @@ public class AutonomousRemote extends LinearOpMode {
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(200);
-        while (!Common.isInPosition(backArm)){
+        while (!Common.isInPosition(backArm)) {
             sleep(50);
         }
         backArm.setVelocity(0);
-        while (!Common.isInPosition(foreArm)){
+        while (!Common.isInPosition(foreArm)) {
             sleep(50);
         }
         foreArm.setVelocity(0);
-        while (!Common.isInPosition(foreforeArm)){
+        while (!Common.isInPosition(foreforeArm)) {
             sleep(50);
         }
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder( foreforeArmDumpDegree));
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(foreforeArmDumpDegree));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(200);
-        while (!Common.isInPosition(foreforeArm)){
+        while (!Common.isInPosition(foreforeArm)) {
             sleep(50);
         }
         //put arm back in
@@ -236,14 +246,14 @@ public class AutonomousRemote extends LinearOpMode {
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(-17));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(300);
-        while (!Common.isInPosition(foreforeArm)){
+        while (!Common.isInPosition(foreforeArm)) {
             sleep(50);
         }
         foreforeArm.setVelocity(0);
         backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backArm.setVelocity(1000);
-        while (!Common.isInPosition(backArm)){
+        while (!Common.isInPosition(backArm)) {
             sleep(50);
         }
 
@@ -254,7 +264,7 @@ public class AutonomousRemote extends LinearOpMode {
 //        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        foreforeArm.setVelocity(300);
         backArm.setVelocity(0);
-        while (!Common.isInPosition(foreArm)){
+        while (!Common.isInPosition(foreArm)) {
             sleep(50);
         }
         foreArm.setVelocity(0);
