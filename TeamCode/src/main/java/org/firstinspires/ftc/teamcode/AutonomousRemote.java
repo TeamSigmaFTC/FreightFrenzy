@@ -177,12 +177,12 @@ public class AutonomousRemote extends LinearOpMode {
         int foreforeArmDumpDegree;
         if (tsePos == 1) {
             backArmDegree = 180;
-            foreArmDegree = 200;
+            foreArmDegree = 210;
             foreforeArmDumpDegree = 180;
             //bottom
         } else if (tsePos == 2) {
             backArmDegree = 180;
-            foreArmDegree = 175;
+            foreArmDegree = 185;
             foreforeArmDumpDegree = 170;
             //mid
         } else {
