@@ -129,14 +129,14 @@ public class OpMode2 extends LinearOpMode {
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         backArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //backArm.setTargetPositionTolerance(25);
+        backArm.setTargetPositionTolerance(30);
         foreArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //foreArm.setTargetPositionTolerance(25);
+        foreArm.setTargetPositionTolerance(30);
         foreforeArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        backArm.setCurrentAlert(6, CurrentUnit.AMPS);
-        foreArm.setCurrentAlert(6, CurrentUnit.AMPS);
-        foreforeArm.setCurrentAlert(5, CurrentUnit.AMPS);
+        backArm.setCurrentAlert(4, CurrentUnit.AMPS);
+        foreArm.setCurrentAlert(4, CurrentUnit.AMPS);
+        foreforeArm.setCurrentAlert(4, CurrentUnit.AMPS);
 
         //Shows status on driver control station
         telemetry.addData("Status", "Initialized");
@@ -245,7 +245,7 @@ public class OpMode2 extends LinearOpMode {
             Vector2d input = new Vector2d(
                     //Squares power, to allow for more precise robot control
                     y * y * (y > 0 ? -1 : 1),
-                    x * x * (x > 0 ? -1 : 1)).rotated(-drive.getPoseEstimate().getHeading());
+                    x * x * (x > 0 ? -1 : 1)).rotated(-drive.getPoseEstimate().getHeading() - Math.PI/2);
 
             turning = gamepad1.right_stick_x;
             drive.setWeightedDrivePower(
@@ -263,12 +263,14 @@ public class OpMode2 extends LinearOpMode {
                     if (isInPosition(backArm)) {
                         backArm.setVelocity(0);
                         currentMode = Mode.INTAKE_ARM_FORE_MOVE;
-                        foreArm.setTargetPosition(foreArmAngleToEncoder(315));
+//                        foreArm.setTargetPositionTolerance(50);
+                        foreArm.setTargetPosition(foreArmAngleToEncoder(310));
                         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        foreArm.setVelocity(3000);
+                        foreArm.setVelocity(4500);
+
                         foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(-17));
                         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        foreforeArm.setVelocity(300);
+                        foreforeArm.setVelocity(400);
 
                     }
                     break;
@@ -276,12 +278,13 @@ public class OpMode2 extends LinearOpMode {
                     if (isInPosition(foreforeArm) && isInPosition(foreArm)) {
                         foreforeArm.setVelocity(0);
                         currentMode = Mode.INTAKE_ARM_BACK_MOVE_2;
+//                        foreArm.setTargetPositionTolerance(15);
                         foreArm.setTargetPosition(foreArmAngleToEncoder(325));
                         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        foreArm.setVelocity(3000);
+                        foreArm.setVelocity(4500);
                         backArm.setTargetPosition(backArmAngleToEncoder(218));
                         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        backArm.setVelocity(2000);
+                        backArm.setVelocity(4000);
                     }
                     break;
                 case INTAKE_ARM_BACK_MOVE_2:
@@ -298,7 +301,7 @@ public class OpMode2 extends LinearOpMode {
                 currentMode = Mode.INTAKE_ARM_BACK_MOVE;
                 backArm.setTargetPosition(backArmAngleToEncoder(180));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                backArm.setVelocity(2000);
+                backArm.setVelocity(4000);
             }
             //Saves button state for the next loop.
             lastPickUp = pickUpPress;
@@ -307,15 +310,15 @@ public class OpMode2 extends LinearOpMode {
             boolean topPosPress = topPos && !lastTop;
             if (topPosPress) {
                 //Moves arm to a position to deposit the freight in the top level
-                backArm.setTargetPosition(backArmAngleToEncoder(150));
+                backArm.setTargetPosition(backArmAngleToEncoder(170));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                backArm.setVelocity(2000);
+                backArm.setVelocity(4000);
                 foreArm.setTargetPosition(foreArmAngleToEncoder(129));
                 foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreArm.setVelocity(2000);
+                foreArm.setVelocity(4000);
                 foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(90));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreforeArm.setVelocity(200);
+                foreforeArm.setVelocity(400);
 
             }
             lastTop = topPos;
