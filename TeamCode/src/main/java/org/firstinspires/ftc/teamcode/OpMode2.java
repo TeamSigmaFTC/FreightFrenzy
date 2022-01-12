@@ -58,26 +58,12 @@ public class OpMode2 extends LinearOpMode {
         return (int) Math.round(BACK_ARM_STARTING_ANGLE - encoder/BACK_ARM_ENCODER_ANGLE_RATIO);
     }
 
-//    private int FORE_ARM_SLACK_AT_90 = 46;
     public int foreArmAngleToEncoder(int degree) {
-//        if (degree >= 90 + FORE_ARM_SLACK_AT_90) {
-//            degree -= FORE_ARM_SLACK_AT_90;
-//        }
-//        if (degree >= 270 && degree <= 360) {
-//            degree -= FORE_ARM_SLACK_AT_90 * (degree -270)/90;
-//        }
         return (int) Math.round(FORE_ARM_ENCODER_ANGLE_RATIO * (FORE_ARM_STARTING_ANGLE - degree));
     }
 
     public int foreArmEncoderToAngle(int encoder) {
         return (int) Math.round(FORE_ARM_STARTING_ANGLE - encoder/FORE_ARM_ENCODER_ANGLE_RATIO);
-//        if(degree >= 90){
-//            degree += FORE_ARM_SLACK_AT_90;
-//        }
-//        if (degree >= 270 && degree <= 360) {
-//            degree -= FORE_ARM_SLACK_AT_90 * (degree -270)/90;
-//        }
-//        return degree;
     }
 
     public int foreforeArmAngleToEncoder(int degree) {
@@ -97,6 +83,7 @@ public class OpMode2 extends LinearOpMode {
         INTAKE_ARM_BACK_MOVE,
         INTAKE_ARM_FORE_MOVE,
         INTAKE_ARM_BACK_MOVE_2,
+        INTAKE_ARM_BACK_MOVE_3,
     }
 
     @Override
@@ -200,12 +187,11 @@ public class OpMode2 extends LinearOpMode {
             topPos = this.gamepad2.x; //this.gamepad2.right_bumper;
             midPos = this.gamepad2.y; //this.gamepad2.b;
             capPos = this.gamepad2.left_bumper;
-            eStop  = this.gamepad1.left_stick_button;
+            eStop  = this.gamepad2.left_stick_button;
             spinRed = this.gamepad1.a;
             spinBlue = this.gamepad1.b;
             sharedPos = this.gamepad2.dpad_right;
 
-//            telemetry.addData("magnet pressed", magnet.isPressed());
             double distance = sensorDistance.getDistance(DistanceUnit.CM);
             telemetry.addData("Color v3 Distance (cm)",
                     String.format(Locale.US, "%.03f", distance));
@@ -259,41 +245,62 @@ public class OpMode2 extends LinearOpMode {
             //Increases robot efficiency by saving the time it takes for it to constantly reset its
             //power and position when a button is held down
             switch (currentMode) {
-                case INTAKE_ARM_BACK_MOVE:
-                    if (isInPosition(backArm)) {
+                case NONE:
+                    //remove power from the arm motors if the arms are in position
+                    if(backArm.getMode() == DcMotor.RunMode.RUN_TO_POSITION && isInPosition(backArm)) {
+                        backArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                         backArm.setVelocity(0);
+                    }
+                    if(foreArm.getMode() == DcMotor.RunMode.RUN_TO_POSITION && isInPosition(foreArm)) {
+                        foreArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        foreArm.setVelocity(0);
+                    }
+                    if(foreforeArm.getMode() == DcMotor.RunMode.RUN_TO_POSITION && isInPosition(foreforeArm)) {
+                        foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        foreforeArm.setVelocity(0);
+                    }
+                    break;
+                case INTAKE_ARM_BACK_MOVE:
+                    if (isInPosition(backArm) && isInPosition(foreforeArm)) {
+                        backArm.setVelocity(0);
+                        foreforeArm.setVelocity(0);
                         currentMode = Mode.INTAKE_ARM_FORE_MOVE;
-//                        foreArm.setTargetPositionTolerance(50);
                         foreArm.setTargetPosition(foreArmAngleToEncoder(310));
                         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         foreArm.setVelocity(4500);
-
-                        foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(-17));
-                        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        foreforeArm.setVelocity(400);
-
                     }
                     break;
                 case INTAKE_ARM_FORE_MOVE:
-                    if (isInPosition(foreforeArm) && isInPosition(foreArm)) {
-                        foreforeArm.setVelocity(0);
+                    if (isInPosition(foreArm)) {
+                        foreArm.setVelocity(0);
                         currentMode = Mode.INTAKE_ARM_BACK_MOVE_2;
-//                        foreArm.setTargetPositionTolerance(15);
-                        foreArm.setTargetPosition(foreArmAngleToEncoder(325));
-                        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        foreArm.setVelocity(4500);
-                        backArm.setTargetPosition(backArmAngleToEncoder(218));
-                        backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        backArm.setVelocity(4000);
+                        foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(-17));
+                        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        foreforeArm.setVelocity(700);
                     }
                     break;
                 case INTAKE_ARM_BACK_MOVE_2:
-                    if (isInPosition(backArm)){
+                    if (isInPosition(foreforeArm)){
+                        foreforeArm.setVelocity(0);
+                        backArm.setTargetPosition(backArmAngleToEncoder(218));
+                        backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        backArm.setVelocity(4000);
+                        foreArm.setTargetPosition(foreArmAngleToEncoder(325));
+                        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        foreArm.setVelocity(4500);
+
+                        currentMode = Mode.INTAKE_ARM_BACK_MOVE_3;
+                    }
+                    break;
+                case INTAKE_ARM_BACK_MOVE_3:
+                    if (isInPosition(backArm) && isInPosition(foreArm)) {
                         backArm.setVelocity(0);
+                        foreArm.setVelocity(0);
                         currentMode = Mode.NONE;
                     }
                     break;
             }
+
             boolean pickUpPress = pickUpPos && !lastPickUp;
             if (pickUpPress) { //backarm to 180 --- foreforearm goes to 270 --- forearm goes to -30 --- once they reach their positions, foreforearm goes to -30 --- once the ff arm gets to its position, backarm move to -210 --- bam done
                 //Sets each arm to a specific position, then runs them to their position at a set velocity
@@ -302,6 +309,9 @@ public class OpMode2 extends LinearOpMode {
                 backArm.setTargetPosition(backArmAngleToEncoder(180));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 backArm.setVelocity(4000);
+                foreforeArm.setTargetPosition(foreforeArmAngleToEncoder(90));
+                foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                foreforeArm.setVelocity(700);
             }
             //Saves button state for the next loop.
             lastPickUp = pickUpPress;
@@ -442,7 +452,6 @@ public class OpMode2 extends LinearOpMode {
                 lastFFArmDown = FFArmDown;
             }
 
-
             if (eStop) {
                 //if emergency stop
                 backArm.setVelocity(0);
@@ -452,6 +461,7 @@ public class OpMode2 extends LinearOpMode {
             }
 
             //Prints out information on the driver control station screen for puny humans
+            telemetry.addData("foerarm power", foreArm.getPower());
             telemetry.addData("estop", eStop);
             telemetry.addData("currentMode", currentMode.toString());
             telemetry.addData("backArm angle", backArmEncoderToAngle(backArm.getCurrentPosition()));
