@@ -28,6 +28,7 @@ public class AutonomousRemote extends LinearOpMode {
     private DcMotorEx backArm;
     private DcMotorEx intake;
     private TouchSensor magnet;
+    private SampleMecanumDrive drive;
 
     private OpenCvCamera webcam;
     private ContourPipeline pipeline;
@@ -105,7 +106,7 @@ public class AutonomousRemote extends LinearOpMode {
             }
         });
 
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        drive = new SampleMecanumDrive(hardwareMap);
 
         drive.setPoseEstimate(startPose);
 
@@ -234,58 +235,8 @@ public class AutonomousRemote extends LinearOpMode {
             sleep(50);
         }
 
-        // put arm back in
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
-        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(900);
-        backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
-        backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backArm.setVelocity(3000);
-
-        //park
-        drive.followTrajectorySequenceAsync(trajseq3);
-//        drive.followTrajectoryAsync(traj3);
-        while (!Common.isInPosition(foreforeArm) || !Common.isInPosition(backArm)) {
-            drive.update();
-        }
-        foreforeArm.setVelocity(0);
-        backArm.setVelocity(0);
-
-        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(310));
-        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(3000);
-
-        while (!Common.isInPosition(foreArm)) {
-            drive.update();
-        }
-        foreArm.setVelocity(0);
-
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(-17));
-        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(700);
-        while (!Common.isInPosition(foreforeArm)) {
-            drive.update();
-        }
-
-        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(325));
-        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(4000);
-        backArm.setTargetPosition(Common.backArmAngleToEncoder(217));
-        backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backArm.setVelocity(3000);
-
-        while (!Common.isInPosition(foreArm)) {
-            drive.update();
-        }
-        foreArm.setVelocity(0);
-        while (!Common.isInPosition(backArm)) {
-            drive.update();
-        }
-        backArm.setVelocity(0);
-        // finish following traj3
-        while(drive.isBusy()) {
-            drive.update();
-        }
+        // drive to warehouse and put arm back in
+        followTrajectoryAndPutArmBackIn(trajseq3);
 
         // inch forward to pickup freight
         drive.followTrajectorySequence(trajseq4);
@@ -320,7 +271,12 @@ public class AutonomousRemote extends LinearOpMode {
             sleep(50);
         }
 
-        // 2nd put arm back in
+        // 2nd drive back to warehouse and put arm back in
+        followTrajectoryAndPutArmBackIn(trajseq6);
+    }
+
+    private void followTrajectoryAndPutArmBackIn(TrajectorySequence trajseq) {
+        // put arm back in
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(900);
@@ -328,8 +284,8 @@ public class AutonomousRemote extends LinearOpMode {
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backArm.setVelocity(3000);
 
-        // 2nd park
-        drive.followTrajectorySequenceAsync(trajseq6);
+        //park
+        drive.followTrajectorySequenceAsync(trajseq);
         while (!Common.isInPosition(foreforeArm) || !Common.isInPosition(backArm)) {
             drive.update();
         }
@@ -367,10 +323,9 @@ public class AutonomousRemote extends LinearOpMode {
             drive.update();
         }
         backArm.setVelocity(0);
-        // finish following trajseq6
+        // finish following trajseq
         while(drive.isBusy()) {
             drive.update();
         }
     }
-
 }
