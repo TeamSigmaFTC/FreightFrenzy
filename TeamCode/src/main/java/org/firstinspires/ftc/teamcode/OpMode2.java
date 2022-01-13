@@ -184,8 +184,8 @@ public class OpMode2 extends LinearOpMode {
             ForeArmUp = this.gamepad2.right_stick_y;
             FFArmDown = this.gamepad2.dpad_up;
             FFArmUp = this.gamepad2.dpad_down;
-            intakeRun = this.gamepad1.left_trigger;
-            outakeRun = this.gamepad1.right_trigger;
+            intakeRun = this.gamepad1.right_trigger;
+            outakeRun = this.gamepad1.left_trigger;
             pickUpPos = this.gamepad2.b; //this.gamepad2.left_bumper;
             topPos = this.gamepad2.x; //this.gamepad2.right_bumper;
             midPos = this.gamepad2.y; //this.gamepad2.b;
@@ -401,9 +401,9 @@ public class OpMode2 extends LinearOpMode {
             boolean intakeOutPress = outakeRun > 0.1 && !lastIntakeOut;
             boolean intakeOutRelease = outakeRun < 0.1 && lastIntakeOut;
             if (intakeInPress) {
-                intake.setPower(1);
-            } else if (intakeOutPress) {
                 intake.setPower(-1);
+            } else if (intakeOutPress) {
+                intake.setPower(1);
             } else if (intakeInRelease || intakeOutRelease) {
                 intake.setPower(0);
             }
