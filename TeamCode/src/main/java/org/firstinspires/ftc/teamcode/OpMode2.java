@@ -115,18 +115,21 @@ public class OpMode2 extends LinearOpMode {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        backArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backArm.setTargetPositionTolerance(30);
-        foreArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         foreArm.setTargetPositionTolerance(30);
-        foreforeArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        if(magnet.isPressed()) {
+            backArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            foreArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            foreforeArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
 
         backArm.setCurrentAlert(4, CurrentUnit.AMPS);
         foreArm.setCurrentAlert(4, CurrentUnit.AMPS);
         foreforeArm.setCurrentAlert(4, CurrentUnit.AMPS);
 
         //Shows status on driver control station
-        telemetry.addData("Status", "Initialized");
+        telemetry.addData("Status", "Initialized" + (magnet.isPressed()? " with arms encoders reset" : ""));
         telemetry.update();
 
         //Waits for start
@@ -441,10 +444,10 @@ public class OpMode2 extends LinearOpMode {
 
                 if (ffArmUpPress) {
                     foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    foreforeArm.setVelocity(400);
+                    foreforeArm.setVelocity(700);
                 } else if (ffArmDownPress) {
                     foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    foreforeArm.setVelocity(-400);
+                    foreforeArm.setVelocity(-700);
                 } else if (ffArmUpRelease || ffArmDownRelease) {
                     foreforeArm.setVelocity(0);
                 }
