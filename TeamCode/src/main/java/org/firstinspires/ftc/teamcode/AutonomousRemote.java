@@ -102,11 +102,6 @@ public class AutonomousRemote extends LinearOpMode {
             }
         });
 
-        // Only if you are using ftcdashboard
-//        FtcDashboard dashboard = FtcDashboard.getInstance();
-//        telemetry = dashboard.getTelemetry();
-//        FtcDashboard.getInstance().startCameraStream(webcam, 10);
-
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         drive.setPoseEstimate(startPose);
@@ -121,8 +116,6 @@ public class AutonomousRemote extends LinearOpMode {
                 .splineTo(new Vector2d(TRANSITION_X, TRANSITION_Y), Math.toRadians(TRANSITION_ANGLE))
                 .splineTo(new Vector2d(WAREHOUSE_X, WAREHOUSE_Y), Math.toRadians(WAREHOUSE_ANGLE))
                 .build();
-        Trajectory traj4 = drive.trajectoryBuilder(traj3.end())
-                .build();
 
         if(magnet.isPressed()) {
             telemetry.addData("Initialized", "Arms in right position");
@@ -133,15 +126,16 @@ public class AutonomousRemote extends LinearOpMode {
         waitForStart();
 
         if (isStopRequested()) return;
-        //getRuntime() < 2
-        while (true) {
+
+        resetStartTime();
+        while (getRuntime() < 3) {
             if (pipeline.error) {
                 telemetry.addData("Exception: ", pipeline.debug.getStackTrace());
             }
             double rectangleArea = pipeline.getRectArea();
 
             //Print out the area of the rectangle that is found.
-            telemetry.addData("Rectangle Area", rectangleArea);
+//            telemetry.addData("Rectangle Area", rectangleArea);
             //Check to see if the rectangle has a large enough area to be a marker.
             if (rectangleArea > minRectangleArea) {
                 double cameraWidth = pipeline.getCameraWidth();
@@ -166,11 +160,6 @@ public class AutonomousRemote extends LinearOpMode {
         //drive to carousel and spin.
         drive.followTrajectory(traj1);
         spinner.setPower(1);
-        sleep(3000);
-        spinner.setPower(0);
-
-        //drive to TSH and drop freight
-        drive.followTrajectory(traj2);
 
         int backArmDegree;
         int foreArmDegree;
@@ -191,15 +180,23 @@ public class AutonomousRemote extends LinearOpMode {
             foreforeArmDumpDegree = 218;
             //top
         }
+        // start raising arm to drop position
         backArm.setTargetPosition(Common.backArmAngleToEncoder(backArmDegree));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backArm.setVelocity(1000);
+        backArm.setVelocity(3000);
         foreArm.setTargetPosition(Common.foreArmAngleToEncoder(foreArmDegree));
         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(1000);
+        foreArm.setVelocity(3000);
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(200);
+        foreforeArm.setVelocity(500);
+
+        sleep(2500);
+        spinner.setPower(0);
+
+        //drive to TSH and drop freight
+        drive.followTrajectory(traj2);
+
         while (!Common.isInPosition(backArm)) {
             sleep(50);
         }
@@ -213,71 +210,62 @@ public class AutonomousRemote extends LinearOpMode {
         }
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(foreforeArmDumpDegree));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(200);
+        foreforeArm.setVelocity(500);
         while (!Common.isInPosition(foreforeArm)) {
             sleep(50);
         }
-        //put arm back in
-//        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder((int) Common.FORE_FORE_ARM_STARTING_ANGLE));
-//        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        foreforeArm.setVelocity(300);
-//
-//        while (!Common.isInPosition(foreforeArm)){
-//            sleep(50);
-//        }
-//        foreforeArm.setVelocity(0);
-//        foreArm.setTargetPosition(Common.foreArmAngleToEncoder((int) Common.FORE_ARM_STARTING_ANGLE));
-//        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        foreArm.setVelocity(2000);
-//
-//        backArm.setTargetPosition(Common.backArmAngleToEncoder((int) Common.BACK_ARM_STARTING_ANGLE));
-//        backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        backArm.setVelocity(1000);
-//        while (!Common.isInPosition(backArm)){
-//            sleep(50);
-//        }
-//        backArm.setVelocity(0);
-//        while (!Common.isInPosition(foreArm)){
-//            sleep(50);
-//        }
-//        foreArm.setVelocity(0);
 
-        //new put arm back in
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(-17));
+        // put arm back in
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(300);
-        while (!Common.isInPosition(foreforeArm)) {
-            sleep(50);
-        }
-        foreforeArm.setVelocity(0);
+        foreforeArm.setVelocity(700);
         backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backArm.setVelocity(1000);
-        while (!Common.isInPosition(backArm)) {
-            sleep(50);
+        backArm.setVelocity(4000);
+
+        //park
+        drive.followTrajectoryAsync(traj3);
+        while (!Common.isInPosition(foreforeArm) || !Common.isInPosition(backArm)) {
+            drive.update();
+        }
+        foreforeArm.setVelocity(0);
+        backArm.setVelocity(0);
+
+        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(310));
+        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        foreArm.setVelocity(3000);
+
+        while (!Common.isInPosition(foreArm)) {
+            drive.update();
+        }
+        foreArm.setVelocity(0);
+
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(-17));
+        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        foreforeArm.setVelocity(700);
+        while (!Common.isInPosition(foreforeArm)) {
+            drive.update();
         }
 
         foreArm.setTargetPosition(Common.foreArmAngleToEncoder(325));
         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(2000);
-//        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(-17));
-//        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        foreforeArm.setVelocity(300);
-        backArm.setVelocity(0);
-        while (!Common.isInPosition(foreArm)) {
-            sleep(50);
-        }
-        foreArm.setVelocity(0);
-//        while (!Common.isInPosition(foreforeArm)){
-//            sleep(50);
-//        }
-//        foreforeArm.setVelocity(0);
+        foreArm.setVelocity(4000);
         backArm.setTargetPosition(Common.backArmAngleToEncoder(218));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backArm.setVelocity(1000);
-        //park
-        drive.followTrajectory(traj3);
+        backArm.setVelocity(3000);
 
+        while (!Common.isInPosition(foreArm)) {
+            drive.update();
+        }
+        foreArm.setVelocity(0);
+        while (!Common.isInPosition(backArm)) {
+            drive.update();
+        }
+        backArm.setVelocity(0);
+        // finish following traj3
+        while(drive.isBusy()) {
+            drive.update();
+        }
     }
 
 }
