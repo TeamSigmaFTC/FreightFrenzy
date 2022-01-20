@@ -1,23 +1,36 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.opencv.core.Scalar;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+
+import java.util.Locale;
 
 @Config
 @Autonomous
@@ -63,7 +76,12 @@ public class AutonomousRemote extends LinearOpMode {
     // Green Range                                      Y      Cr     Cb
     public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
     public static Scalar scalarUpperYCrCb = new Scalar(255.0, 120.0, 120.0);
+    private ColorSensor sensorColor;
+    private DistanceSensor sensorDistance;
+    private RevBlinkinLedDriver blinkinLedDriver;
 
+    //hsvValues is an array that will hold the hue, saturation, and value information
+    float hsvValues[] = {0F, 0F, 0F};
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -74,6 +92,10 @@ public class AutonomousRemote extends LinearOpMode {
         foreArm = hardwareMap.get(DcMotorEx.class, "forearm");
         backArm = hardwareMap.get(DcMotorEx.class, "backarm");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
+
+        sensorColor = hardwareMap.get(ColorSensor.class, "color");
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "color");
+        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
 
         backArm.setTargetPositionTolerance(30);
         foreArm.setTargetPositionTolerance(30);
@@ -107,8 +129,7 @@ public class AutonomousRemote extends LinearOpMode {
         });
 
         drive = new SampleMecanumDrive(hardwareMap);
-
-        drive.setPoseEstimate(startPose);
+        drive.addT265(hardwareMap);
 
         Trajectory traj1 = drive.trajectoryBuilder(startPose)
                 .splineTo(new Vector2d(SPINNER_X, SPINNER_Y), Math.toRadians(SPINNER_ANGLE))
@@ -125,8 +146,16 @@ public class AutonomousRemote extends LinearOpMode {
                 .splineTo(new Vector2d(WAREHOUSE_X, WAREHOUSE_Y), Math.toRadians(WAREHOUSE_ANGLE))
                 .build();
         TrajectorySequence trajseq4 = drive.trajectorySequenceBuilder(trajseq3.end())
+                .setVelConstraint(new TrajectoryVelocityConstraint() {
+                    @Override
+                    public double get(double v, @NonNull Pose2d pose2d, @NonNull Pose2d pose2d1, @NonNull Pose2d pose2d2) {
+                        // limit max speed to 5in/s
+                        return 8;
+                    }
+                })
                 .addTemporalMarker(()->intake.setPower(-1))
                 .forward(4)
+                .waitSeconds(0.5) // extra 0.5 seconds to make sure one is picked up
                 .addTemporalMarker(()->intake.setPower(0))
                 .build();
         TrajectorySequence trajseq5 = drive.trajectorySequenceBuilder(trajseq4.end())
@@ -144,6 +173,16 @@ public class AutonomousRemote extends LinearOpMode {
         }
         telemetry.update();
         waitForStart();
+
+        drive.setPoseEstimate(startPose);
+        if(drive.t265 != null){
+            drive.t265.setPoseEstimate(startPose);
+        } else if (drive.getLocalizer() instanceof LocalizerT265){
+            LocalizerT265 loc = (LocalizerT265) drive.getLocalizer();
+            if(loc.defaultLocalizer != null) {
+                loc.defaultLocalizer.setPoseEstimate(startPose);
+            }
+        }
 
         if (isStopRequested()) return;
 
@@ -191,8 +230,8 @@ public class AutonomousRemote extends LinearOpMode {
             //bottom
         } else if (tsePos == 2) {
             backArmDegree = 180;
-            foreArmDegree = 185;
-            foreforeArmDumpDegree = 170;
+            foreArmDegree = 180;
+            foreforeArmDumpDegree = 160;
             //mid
         } else {
             backArmDegree = 150;
@@ -234,58 +273,80 @@ public class AutonomousRemote extends LinearOpMode {
         while (!Common.isInPosition(foreforeArm)) {
             sleep(50);
         }
+        sleep(500);
 
         // drive to warehouse and put arm back in
         followTrajectoryAndPutArmBackIn(trajseq3);
 
         // inch forward to pickup freight
-        drive.followTrajectorySequence(trajseq4);
-        // go back to shipping hub
-        drive.followTrajectorySequence(trajseq5);
-        // lift arm and dump
-        backArm.setTargetPosition(Common.backArmAngleToEncoder(170));
-        backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backArm.setVelocity(4000);
-        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(129));
-        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(4000);
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
-        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(400);
-        while(!Common.isInPosition(foreforeArm)) {
+        drive.followTrajectorySequenceAsync(trajseq4);
+        boolean intakeSuccess = false;
+        while(drive.isBusy()) {
             drive.update();
-        }
-        foreforeArm.setVelocity(0);
-        while(!Common.isInPosition(foreArm)) {
-            drive.update();
-        }
-        foreArm.setVelocity(0);
-        while(!Common.isInPosition(backArm)) {
-            drive.update();
-        }
-        backArm.setVelocity(0);
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(180));
-        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(500);
-        while (!Common.isInPosition(foreforeArm)) {
-            sleep(50);
+            double distance = sensorDistance.getDistance(DistanceUnit.CM);
+            Color.RGBToHSV(sensorColor.red(), sensorColor.green(), sensorColor.blue(), hsvValues);
+            float hue = hsvValues[0];
+            if (hue < 140 && hue > 75 && distance < 4) {
+                //show amber if the detected color is yellow-ish
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+                intakeSuccess = true;
+            } else if (hue > 154 && hue < 165 && distance < 3) {
+                //show amber if the detected color is white-ish
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.WHITE);
+                intakeSuccess = true;
+            }
         }
 
-        // 2nd drive back to warehouse and put arm back in
-        followTrajectoryAndPutArmBackIn(trajseq6);
+        if(intakeSuccess) {
+            // go back to shipping hub
+            drive.followTrajectorySequence(trajseq5);
+            // lift arm and dump
+            backArm.setTargetPosition(Common.backArmAngleToEncoder(170));
+            backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            backArm.setVelocity(4000);
+            foreArm.setTargetPosition(Common.foreArmAngleToEncoder(129));
+            foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            foreArm.setVelocity(4000);
+            foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
+            foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            foreforeArm.setVelocity(400);
+            while (!Common.isInPosition(foreforeArm)) {
+                drive.update();
+            }
+            foreforeArm.setVelocity(0);
+            while (!Common.isInPosition(foreArm)) {
+                drive.update();
+            }
+            foreArm.setVelocity(0);
+            while (!Common.isInPosition(backArm)) {
+                drive.update();
+            }
+            backArm.setVelocity(0);
+            foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(180));
+            foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            foreforeArm.setVelocity(500);
+            while (!Common.isInPosition(foreforeArm)) {
+                sleep(50);
+            }
+
+            // 2nd drive back to warehouse and put arm back in
+            followTrajectoryAndPutArmBackIn(trajseq6);
+        }
+        Storage.currentPose = drive.getPoseEstimate();
     }
 
     private void followTrajectoryAndPutArmBackIn(TrajectorySequence trajseq) {
+        //park
+        drive.followTrajectorySequenceAsync(trajseq);
+
         // put arm back in
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(900);
+        foreforeArm.setVelocity(700);
         backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backArm.setVelocity(3000);
 
-        //park
-        drive.followTrajectorySequenceAsync(trajseq);
         while (!Common.isInPosition(foreforeArm) || !Common.isInPosition(backArm)) {
             drive.update();
         }
@@ -311,7 +372,7 @@ public class AutonomousRemote extends LinearOpMode {
         foreArm.setTargetPosition(Common.foreArmAngleToEncoder(325));
         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreArm.setVelocity(4000);
-        backArm.setTargetPosition(Common.backArmAngleToEncoder(217));
+        backArm.setTargetPosition(Common.backArmAngleToEncoder(218));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backArm.setVelocity(3000);
 

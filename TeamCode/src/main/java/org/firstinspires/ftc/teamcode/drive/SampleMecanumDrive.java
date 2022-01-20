@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.drive.MecanumDrive;
 import com.acmerobotics.roadrunner.followers.HolonomicPIDVAFollower;
 import com.acmerobotics.roadrunner.followers.TrajectoryFollower;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.localization.Localizer;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstraint;
@@ -28,6 +29,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.teamcode.LocalizerT265;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceRunner;
@@ -134,6 +136,28 @@ public class SampleMecanumDrive extends MecanumDrive {
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
     }
 
+//    @Override
+//    public void setPoseEstimate(Pose2d pose) {
+//        getLocalizer().setPoseEstimate(pose);
+//        if(t265 != null) {
+//            t265.setPoseEstimate(pose);
+//        }
+//    }
+
+    // use T265 as localizer
+    public void useT265(HardwareMap hardwareMap) {
+        Localizer loc = getLocalizer();
+        LocalizerT265 locNew = new LocalizerT265(hardwareMap);
+        locNew.defaultLocalizer = loc;
+        setLocalizer(locNew);
+    }
+
+    public LocalizerT265 t265 = null;
+    // use default localizer but also make t265 available
+    public void addT265(HardwareMap hardwareMap) {
+        t265 = new LocalizerT265(hardwareMap);
+    }
+
     public TrajectoryBuilder trajectoryBuilder(Pose2d startPose) {
         return new TrajectoryBuilder(startPose, VEL_CONSTRAINT, ACCEL_CONSTRAINT);
     }
@@ -193,10 +217,17 @@ public class SampleMecanumDrive extends MecanumDrive {
         return trajectorySequenceRunner.getLastPoseError();
     }
 
+    public void cancelFollowing() {
+        trajectorySequenceRunner.clear();
+    }
     public void update() {
         updatePoseEstimate();
         DriveSignal signal = trajectorySequenceRunner.update(getPoseEstimate(), getPoseVelocity());
         if (signal != null) setDriveSignal(signal);
+        if (t265 != null) {
+            Pose2d velocity = getPoseVelocity();
+            t265.update(velocity.getY() * 0.0254, -velocity.getX() * 0.0254);
+        }
     }
 
     public void waitForIdle() {
@@ -280,6 +311,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     @Override
     public double getRawExternalHeading() {
+//        return getLocalizer().getPoseEstimate().getHeading();
         return imu.getAngularOrientation().firstAngle;
     }
 
