@@ -46,15 +46,12 @@ public class AutonomousBlueWarehouse extends LinearOpMode {
     public static double SHIPPING_HUB_X = 12;
     public static double SHIPPING_HUB_Y = 49;
     public static double SHIPPING_HUB_ANGLE = 45;
-
     public static double TRANSITION1_X = -9;
     public static double TRANSITION1_Y = 60;
     public static double TRANSITION1_ANGLE = 180;
-
     public static double TRANSITION2_X = 16;
     public static double TRANSITION2_Y = 65;
     public static double TRANSITION2_ANGLE = 0;
-
     public static double WAREHOUSE_X = 42;
     public static double WAREHOUSE_Y = 65;
     public static double WAREHOUSE_ANGLE = 0;
@@ -161,19 +158,19 @@ public class AutonomousBlueWarehouse extends LinearOpMode {
         int foreArmDegree;
         int foreforeArmDumpDegree;
         if (tsePos == 1) {
-            backArmDegree = 170;
+            backArmDegree = 180;
             foreArmDegree = 210;
             foreforeArmDumpDegree = 180;
             //bottom
         }else if (tsePos == 2){
             backArmDegree = 180;
-            foreArmDegree = 169;
-            foreforeArmDumpDegree = 180;
+            foreArmDegree = 180;
+            foreforeArmDumpDegree = 160;
             //mid
         }else {
             backArmDegree = 150;
             foreArmDegree = 129;
-            foreforeArmDumpDegree = 218;
+            foreforeArmDumpDegree = 200;
             //top
         }
         backArm.setTargetPosition(Common.backArmAngleToEncoder(backArmDegree));
