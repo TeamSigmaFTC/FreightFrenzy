@@ -56,13 +56,13 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
     private int tsePos = 0;
 
     protected Pose2d startPose = new Pose2d(12, 63, Math.toRadians(-90));
-    public static double SHIPPING_HUB_X = 12;
-    public static double SHIPPING_HUB_Y = 49;
-    public static double SHIPPING_HUB_ANGLE = 45;
+    public static double SHIPPING_HUB_X = -5;
+    public static double SHIPPING_HUB_Y = 57;
+    public static double SHIPPING_HUB_ANGLE = 70;
     public static double TRANSITION1_X = -9;
     public static double TRANSITION1_Y = 60;
     public static double TRANSITION1_ANGLE = 180;
-    public static double TRANSITION_X = 16;
+    public static double TRANSITION_X = 12;
     public static double TRANSITION_Y = 65.5;
     public static double TRANSITION_ANGLE = 0;
     public static double WAREHOUSE_X = 43;
@@ -130,10 +130,10 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         Trajectory traj1 = drive.trajectoryBuilder(startPose)
                 .splineTo(new Vector2d(SHIPPING_HUB_X, SHIPPING_HUB_Y), Math.toRadians(SHIPPING_HUB_ANGLE))
                 .build();
-        Trajectory traj2 = drive.trajectoryBuilder(traj1.end(),true)
-                .splineTo(new Vector2d(TRANSITION1_X, TRANSITION1_Y), Math.toRadians(TRANSITION1_ANGLE))
-                .build();
-        TrajectorySequence trajseq3 = drive.trajectorySequenceBuilder((traj2.end()))
+//        Trajectory traj2 = drive.trajectoryBuilder(traj1.end(),true)
+//                .splineTo(new Vector2d(TRANSITION1_X, TRANSITION1_Y), Math.toRadians(TRANSITION1_ANGLE))
+//                .build();
+        TrajectorySequence trajseq3 = drive.trajectorySequenceBuilder((traj1.end()))
                 .splineTo(new Vector2d(TRANSITION_X, TRANSITION_Y), Math.toRadians(TRANSITION_ANGLE))
                 .splineTo(new Vector2d(WAREHOUSE_X, WAREHOUSE_Y), Math.toRadians(WAREHOUSE_ANGLE))
                 .build();
@@ -141,24 +141,24 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                 .setVelConstraint(new TrajectoryVelocityConstraint() {
                     @Override
                     public double get(double v, @NonNull Pose2d pose2d, @NonNull Pose2d pose2d1, @NonNull Pose2d pose2d2) {
-            // limit max speed to 5in/s
-            return 8;
-        }
-    })
-            .addTemporalMarker(()->intake.setPower(-1))
+                        // limit max speed to 5in/s
+                        return 8;
+                    }
+                })
+                .addTemporalMarker(() -> intake.setPower(-1))
                 .forward(4)
                 .waitSeconds(0.5) // extra 0.5 seconds to make sure one is picked up
-                .addTemporalMarker(()->intake.setPower(0))
+                .addTemporalMarker(() -> intake.setPower(0))
                 .build();
         TrajectorySequence trajseq5 = drive.trajectorySequenceBuilder(trajseq4.end())
                 .setTangent(Math.toRadians(180))
-                .splineTo(new Vector2d(5, trajseq4.end().getY()-10), Math.toRadians(-120))
+                .splineTo(new Vector2d(5, trajseq4.end().getY() - 10), Math.toRadians(-120))
                 .build();
         TrajectorySequence trajseq6 = drive.trajectorySequenceBuilder(trajseq5.end())
                 .splineTo(new Vector2d(trajseq4.end().getX(), trajseq4.end().getY()), Math.toRadians(0))
                 .build();
 
-        if(magnet.isPressed()) {
+        if (magnet.isPressed()) {
             telemetry.addData("Initialized", "Arms in right position");
         } else {
             telemetry.addData("WARNING", "Arms NOT in position!");
@@ -167,11 +167,11 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         waitForStart();
 
         drive.setPoseEstimate(startPose);
-        if(drive.t265 != null){
+        if (drive.t265 != null) {
             drive.t265.setPoseEstimate(startPose);
-        } else if (drive.getLocalizer() instanceof LocalizerT265){
+        } else if (drive.getLocalizer() instanceof LocalizerT265) {
             LocalizerT265 loc = (LocalizerT265) drive.getLocalizer();
-            if(loc.defaultLocalizer != null) {
+            if (loc.defaultLocalizer != null) {
                 loc.defaultLocalizer.setPoseEstimate(startPose);
             }
         }
@@ -217,12 +217,12 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         if (tsePos == 1) {
             backArmDegree = 180;
             foreArmDegree = 210;
-            foreforeArmDumpDegree = 180;
+            foreforeArmDumpDegree = 160;
             //bottom
         } else if (tsePos == 2) {
-            backArmDegree = 180;
-            foreArmDegree = 180;
-            foreforeArmDumpDegree = 160;
+            backArmDegree = 230;
+            foreArmDegree = 120;
+            foreforeArmDumpDegree = 142;
             //mid
         } else {
             backArmDegree = 150;
@@ -233,13 +233,13 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         // start raising arm to drop position
         backArm.setTargetPosition(Common.backArmAngleToEncoder(backArmDegree));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backArm.setVelocity(3000);
+        backArm.setVelocity(3500);
         foreArm.setTargetPosition(Common.foreArmAngleToEncoder(foreArmDegree));
         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(3000);
+        foreArm.setVelocity(3500);
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(500);
+        foreforeArm.setVelocity(700);
 
         while (!Common.isInPosition(backArm)) {
             sleep(50);
@@ -261,62 +261,66 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         sleep(500);
 
         // drive to warehouse and put arm back in
-        drive.followTrajectory(traj2);
+//        drive.followTrajectory(traj2);
         followTrajectoryAndPutArmBackIn(trajseq3);
+        int cycle = 0;
 
-        // inch forward to pickup freight
-        drive.followTrajectorySequenceAsync(trajseq4);
-        boolean intakeSuccess = false;
-        while(drive.isBusy()) {
-            drive.update();
-            double distance = sensorDistance.getDistance(DistanceUnit.CM);
-            Color.RGBToHSV(sensorColor.red(), sensorColor.green(), sensorColor.blue(), hsvValues);
-            float hue = hsvValues[0];
-            if (hue < 140 && hue > 75 && distance < 4) {
-                //show amber if the detected color is yellow-ish
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
-                intakeSuccess = true;
-            } else if (hue > 154 && hue < 165 && distance < 3) {
-                //show amber if the detected color is white-ish
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.WHITE);
-                intakeSuccess = true;
-            }
-        }
-
-        if(intakeSuccess) {
-            // go back to shipping hub
-            drive.followTrajectorySequence(trajseq5);
-            // lift arm and dump
-            backArm.setTargetPosition(Common.backArmAngleToEncoder(170));
-            backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            backArm.setVelocity(4000);
-            foreArm.setTargetPosition(Common.foreArmAngleToEncoder(129));
-            foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            foreArm.setVelocity(4000);
-            foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
-            foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            foreforeArm.setVelocity(400);
-            while (!Common.isInPosition(foreforeArm)) {
+        while (cycle < 2) {
+            cycle = cycle + 1;
+            // inch forward to pickup freight
+            drive.followTrajectorySequenceAsync(trajseq4);
+            boolean intakeSuccess = false;
+            while (drive.isBusy()) {
                 drive.update();
-            }
-            foreforeArm.setVelocity(0);
-            while (!Common.isInPosition(foreArm)) {
-                drive.update();
-            }
-            foreArm.setVelocity(0);
-            while (!Common.isInPosition(backArm)) {
-                drive.update();
-            }
-            backArm.setVelocity(0);
-            foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(180));
-            foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            foreforeArm.setVelocity(500);
-            while (!Common.isInPosition(foreforeArm)) {
-                sleep(50);
+                double distance = sensorDistance.getDistance(DistanceUnit.CM);
+                Color.RGBToHSV(sensorColor.red(), sensorColor.green(), sensorColor.blue(), hsvValues);
+                float hue = hsvValues[0];
+                if (hue < 140 && hue > 75 && distance < 4) {
+                    //show amber if the detected color is yellow-ish
+                    blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+                    intakeSuccess = true;
+                } else if (hue > 154 && hue < 165 && distance < 3) {
+                    //show amber if the detected color is white-ish
+                    blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.WHITE);
+                    intakeSuccess = true;
+                }
             }
 
-            // 2nd drive back to warehouse and put arm back in
-            followTrajectoryAndPutArmBackIn(trajseq6);
+            if (intakeSuccess) {
+                // go back to shipping hub
+                drive.followTrajectorySequence(trajseq5);
+                // lift arm and dump
+                backArm.setTargetPosition(Common.backArmAngleToEncoder(170));
+                backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                backArm.setVelocity(4000);
+                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(129));
+                foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                foreArm.setVelocity(4000);
+                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
+                foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                foreforeArm.setVelocity(400);
+                while (!Common.isInPosition(foreforeArm)) {
+                    drive.update();
+                }
+                foreforeArm.setVelocity(0);
+                while (!Common.isInPosition(foreArm)) {
+                    drive.update();
+                }
+                foreArm.setVelocity(0);
+                while (!Common.isInPosition(backArm)) {
+                    drive.update();
+                }
+                backArm.setVelocity(0);
+                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(180));
+                foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                foreforeArm.setVelocity(500);
+                while (!Common.isInPosition(foreforeArm)) {
+                    sleep(50);
+                }
+
+                // 2nd drive back to warehouse and put arm back in
+                followTrajectoryAndPutArmBackIn(trajseq6);
+            }
         }
         Storage.currentPose = drive.getPoseEstimate();
     }
@@ -371,8 +375,10 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         }
         backArm.setVelocity(0);
         // finish following trajseq
-        while(drive.isBusy()) {
+        while (drive.isBusy()) {
             drive.update();
         }
+
     }
 }
+
