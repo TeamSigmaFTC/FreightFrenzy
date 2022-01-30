@@ -57,7 +57,7 @@ public class AutonomousRedWarehouse extends LinearOpMode {
 
     protected Pose2d startPose = new Pose2d(12, -63, Math.toRadians(90));
     public static double SHIPPING_HUB_X = -5;
-    public static double SHIPPING_HUB_Y = -57;
+    public static double SHIPPING_HUB_Y = -55;
     public static double SHIPPING_HUB_ANGLE = -75;
     public static double TRANSITION1_X = -9;
     public static double TRANSITION1_Y = 60;
@@ -220,9 +220,9 @@ public class AutonomousRedWarehouse extends LinearOpMode {
             foreforeArmDumpDegree = 160;
             //bottom
         } else if (tsePos == 2) {
-            backArmDegree = 230;
+            backArmDegree = 218;
             foreArmDegree = 120;
-            foreforeArmDumpDegree = 142;
+            foreforeArmDumpDegree = 147;
             //mid
         } else {
             backArmDegree = 170;
