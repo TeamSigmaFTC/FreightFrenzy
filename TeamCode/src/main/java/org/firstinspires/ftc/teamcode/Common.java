@@ -7,7 +7,7 @@ public class Common {
     public static double BACK_ARM_STARTING_ANGLE = 236;
     // Due to slack, 180 is actually 139, while -180 is actually -221
 
-    private static double FORE_ARM_ENCODER_ANGLE_RATIO = ((((1.0+(46.0/17.0))) * (1.0+(46.0/17.0))) * 28.0) * 24.0 / 360.0;
+    private static double FORE_ARM_ENCODER_ANGLE_RATIO = ((1.0+(46.0/17.0)) * 28.0) * 28.0 / 360.0;
     public static double FORE_ARM_STARTING_ANGLE = 23;
     private static double FORE_FORE_ARM_ENCODER_ANGLE_RATIO = 2.89 * 3.61 * 3.61 * 28.0 / 360.0;
     public static double FORE_FORE_ARM_STARTING_ANGLE = 105;
