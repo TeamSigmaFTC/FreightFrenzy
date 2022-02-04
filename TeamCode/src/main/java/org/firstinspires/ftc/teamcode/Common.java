@@ -20,11 +20,11 @@ public class Common {
     }
 
     public static int foreArmAngleToEncoder(int degree) {
-        return (int) Math.round(FORE_ARM_ENCODER_ANGLE_RATIO * (FORE_ARM_STARTING_ANGLE - degree));
+        return (int) Math.round(-FORE_ARM_ENCODER_ANGLE_RATIO * (FORE_ARM_STARTING_ANGLE - degree));
     }
 
     public static int foreArmEncoderToAngle(int encoder) {
-        return (int) Math.round(FORE_ARM_STARTING_ANGLE - encoder/FORE_ARM_ENCODER_ANGLE_RATIO);
+        return (int) Math.round(FORE_ARM_STARTING_ANGLE + encoder/FORE_ARM_ENCODER_ANGLE_RATIO);
     }
 
     public static int foreforeArmAngleToEncoder(int degree) {
