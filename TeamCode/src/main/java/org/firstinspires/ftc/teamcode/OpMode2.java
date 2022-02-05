@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode;
 //Imports stuff we don't get scary red errors
 import android.graphics.Color;
 
+import com.ThermalEquilibrium.homeostasis.Filters.Estimators.Estimator;
+import com.ThermalEquilibrium.homeostasis.Filters.Estimators.KalmanEstimator;
+import com.ThermalEquilibrium.homeostasis.Filters.Estimators.LowPassEstimator;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.drive.Drive;
@@ -25,6 +28,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.util.Locale;
+import java.util.function.DoubleSupplier;
 
 @TeleOp
 public class OpMode2 extends LinearOpMode {
@@ -48,6 +52,8 @@ public class OpMode2 extends LinearOpMode {
         INTAKE_ARM_FORE_MOVE,
         INTAKE_ARM_BACK_MOVE_2,
         INTAKE_ARM_BACK_MOVE_3,
+        TOP_TRAY_POS_MOVE,
+        TOP_TRAY_POS_MOVE_2,
     }
 
     enum DriveMode {
@@ -100,6 +106,19 @@ public class OpMode2 extends LinearOpMode {
         foreArm.setCurrentAlert(5, CurrentUnit.AMPS);
         foreforeArm.setCurrentAlert(5, CurrentUnit.AMPS);
 
+        double Q = 0.3;
+        double R = 3;
+        int N = 5;
+        DoubleSupplier intakeDistanceSensor = new DoubleSupplier() {
+            @Override
+            public double getAsDouble() {
+                return sensorDistance.getDistance(DistanceUnit.CM);
+            }
+        };
+
+//        Estimator intakeDiistanceEstimator = new KalmanEstimator(intakeDistanceSensor,Q,R,N);
+
+        Estimator intakeDiistanceEstimator = new LowPassEstimator(intakeDistanceSensor, 0.9);
         //Shows status on driver control station
         telemetry.addData("Status", "Initialized" + (magnet.isPressed()? " with arms encoders reset" : ""));
         telemetry.addData("pose", Storage.currentPose);
@@ -178,13 +197,14 @@ public class OpMode2 extends LinearOpMode {
             spinBlue = this.gamepad1.b;
             sharedPos = this.gamepad2.dpad_right;
 
-            double distance = sensorDistance.getDistance(DistanceUnit.CM);
+//            double distance = sensorDistance.getDistance(DistanceUnit.CM);
+            double distance = intakeDiistanceEstimator.update();
             telemetry.addData("Color v3 Distance (cm)",
                     String.format(Locale.US, "%.03f", distance));
             Color.RGBToHSV(sensorColor.red(), sensorColor.green(), sensorColor.blue(), hsvValues);
             float hue = hsvValues[0];
             telemetry.addData("Hue", hue);
-            if (distance < 6.1 && distance > 4 && hue > 140 && hue < 170) {
+            if (distance < 5.7 && distance > 4 && hue > 140 && hue < 170) {
                 // if the sensor is looking through the hole on the basket, show green.
                 redLED1.setState(false);
                 greenLED1.setState(true);
@@ -297,7 +317,7 @@ public class OpMode2 extends LinearOpMode {
                         currentArmMode = ArmMode.INTAKE_ARM_BACK_MOVE_2;
                         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(-17));
                         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        foreforeArm.setVelocity(700);
+                        foreforeArm.setVelocity(1000);
                     }
                     break;
                 case INTAKE_ARM_BACK_MOVE_2:
@@ -317,6 +337,25 @@ public class OpMode2 extends LinearOpMode {
                     if (Common.isInPosition(backArm) && Common.isInPosition(foreArm)) {
                         backArm.setVelocity(0);
                         foreArm.setVelocity(0);
+                        currentArmMode = ArmMode.NONE;
+                    }
+                    break;
+                case TOP_TRAY_POS_MOVE:
+                    if (Common.isInPosition(backArm)) {
+                        backArm.setVelocity(0);
+                        currentArmMode = ArmMode.TOP_TRAY_POS_MOVE_2;
+//                        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(129));
+//                        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        foreArm.setVelocity(2000);
+//                        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
+//                        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        foreforeArm.setVelocity(400);
+                    }
+                    break;
+                case TOP_TRAY_POS_MOVE_2:
+                    if(Common.isInPosition(foreArm) && Common.isInPosition(foreforeArm)) {
+                        foreArm.setVelocity(0);
+                        foreforeArm.setVelocity(0);
                         currentArmMode = ArmMode.NONE;
                     }
                     break;
@@ -341,31 +380,31 @@ public class OpMode2 extends LinearOpMode {
             boolean topPosPress = topPos && !lastTop;
             if (topPosPress) {
                 //Moves arm to a position to deposit the freight in the top level
-                backArm.setTargetPosition(Common.backArmAngleToEncoder(170));
+                backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                backArm.setVelocity(3500);
+                backArm.setVelocity(3000);
+                currentArmMode = ArmMode.TOP_TRAY_POS_MOVE;
                 foreArm.setTargetPosition(Common.foreArmAngleToEncoder(129));
                 foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreArm.setVelocity(3000);
-                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
+                foreArm.setVelocity(700);
+                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(60));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreforeArm.setVelocity(400);
-
+                foreforeArm.setVelocity(200);
             }
             lastTop = topPos;
 
             boolean midPosPress = midPos && !lastMid;
             if (midPosPress) {
                 //Moves arm to a position to deposit the freight in the middle level
-                backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
-                backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                backArm.setVelocity(2000);
-                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(145));
-                foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreArm.setVelocity(2000);
-                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
-                foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreforeArm.setVelocity(400);
+//                backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
+//                backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                backArm.setVelocity(2000);
+//                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(145));
+//                foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                foreArm.setVelocity(2000);
+//                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
+//                foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                foreforeArm.setVelocity(400);
             }
             lastMid = midPos;
 
@@ -446,7 +485,8 @@ public class OpMode2 extends LinearOpMode {
                 boolean foreArmMoved = Math.abs(ForeArmUp - lastForeArmUp) > 0.05;
                 if(foreArmMoved) {
                     foreArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    foreArm.setVelocity(ForeArmUp * 2000);
+                    foreArm.setPower(ForeArmUp);
+//                    foreArm.setVelocity(ForeArmUp * 2000);
                 } else if (Math.abs(ForeArmUp) < 0.01 && Math.abs(lastForeArmUp) > 0.01) {
                     foreArm.setVelocity(0);
                 }
@@ -462,10 +502,10 @@ public class OpMode2 extends LinearOpMode {
 
                 if (ffArmUpPress) {
                     foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    foreforeArm.setVelocity(700);
+                    foreforeArm.setVelocity(1000);
                 } else if (ffArmDownPress) {
                     foreforeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    foreforeArm.setVelocity(-700);
+                    foreforeArm.setVelocity(-1000);
                 } else if (ffArmUpRelease || ffArmDownRelease) {
                     foreforeArm.setVelocity(0);
                 }
