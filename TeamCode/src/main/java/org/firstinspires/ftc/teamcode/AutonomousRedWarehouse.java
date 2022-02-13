@@ -287,7 +287,7 @@ public class AutonomousRedWarehouse extends LinearOpMode {
                 // go back to shipping hub
                 drive.followTrajectorySequence(trajseq5);
                 // lift arm and dump
-                backArm.setTargetPosition(Common.backArmAngleToEncoder(155));
+                backArm.setTargetPosition(Common.backArmAngleToEncoder(170));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 backArm.setVelocity(4000);
 
@@ -315,6 +315,7 @@ public class AutonomousRedWarehouse extends LinearOpMode {
                 while (!Common.isInPosition(foreforeArm)) {
                     sleep(50);
                 }
+
                 // 2nd drive back to warehouse and put arm back in
                 followTrajectoryAndPutArmBackIn(trajseq6);
             }

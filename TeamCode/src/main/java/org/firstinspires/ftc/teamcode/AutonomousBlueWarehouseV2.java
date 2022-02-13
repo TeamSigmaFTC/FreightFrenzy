@@ -60,10 +60,10 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
     public static double SHIPPING_HUB_Y = 57;
     public static double SHIPPING_HUB_ANGLE = 70;
     public static double TRANSITION_X = 12;
-    public static double TRANSITION_Y = 65.5;
+    public static double TRANSITION_Y = 66;
     public static double TRANSITION_ANGLE = 0;
     public static double WAREHOUSE_X = 43;
-    public static double WAREHOUSE_Y = 65.5;
+    public static double WAREHOUSE_Y = 66.5;
     public static double WAREHOUSE_ANGLE = 0;
     public static double FOREARM_SPEED = 700;
 
@@ -150,7 +150,9 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                 .build();
         TrajectorySequence trajseq5 = drive.trajectorySequenceBuilder(trajseq4.end())
                 .setTangent(Math.toRadians(180))
+                .addTemporalMarker(() -> intake.setPower(0.5))
                 .splineTo(new Vector2d(5, trajseq4.end().getY() - 10), Math.toRadians(-120))
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> intake.setPower(0))
                 .build();
         TrajectorySequence trajseq6 = drive.trajectorySequenceBuilder(trajseq5.end())
                 .splineTo(new Vector2d(trajseq4.end().getX(), trajseq4.end().getY()), Math.toRadians(0))
@@ -268,6 +270,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
             // inch forward to pickup freight
             drive.followTrajectorySequenceAsync(trajseq4);
             boolean intakeSuccess = false;
+
             while (drive.isBusy()) {
                 drive.update();
                 double distance = sensorDistance.getDistance(DistanceUnit.CM);
@@ -278,7 +281,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                     blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
                     intakeSuccess = true;
                 } else if (hue > 154 && hue < 165 && distance < 3) {
-                    //show amber if the detected color is white-ish
+                    //show white if the detected color is white-ish
                     blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.WHITE);
                     intakeSuccess = true;
                 }
@@ -288,7 +291,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                 // go back to shipping hub
                 drive.followTrajectorySequence(trajseq5);
                 // lift arm and dump
-                backArm.setTargetPosition(Common.backArmAngleToEncoder(155));
+                backArm.setTargetPosition(Common.backArmAngleToEncoder(170));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 backArm.setVelocity(4000);
 
@@ -319,6 +322,11 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
 
                 // 2nd drive back to warehouse and put arm back in
                 followTrajectoryAndPutArmBackIn(trajseq6);
+            } else {
+                intake.setPower(-0.5);
+                sleep(500);
+                intake.setPower(0);
+                break;
             }
         }
         Storage.currentPose = drive.getPoseEstimate();
