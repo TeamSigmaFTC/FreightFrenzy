@@ -59,14 +59,11 @@ public class AutonomousRedWarehouse extends LinearOpMode {
     public static double SHIPPING_HUB_X = -5;
     public static double SHIPPING_HUB_Y = -55;
     public static double SHIPPING_HUB_ANGLE = -75;
-    public static double TRANSITION1_X = -9;
-    public static double TRANSITION1_Y = 60;
-    public static double TRANSITION1_ANGLE = 180;
-    public static double TRANSITION_X = 12;
+    public static double TRANSITION_X = 15;
     public static double TRANSITION_Y = -66;
     public static double TRANSITION_ANGLE = 0;
     public static double WAREHOUSE_X = 43;
-    public static double WAREHOUSE_Y = -66;
+    public static double WAREHOUSE_Y = -66.5;
     public static double WAREHOUSE_ANGLE = 0;
 
     // Green Range                                      Y      Cr     Cb
@@ -215,9 +212,9 @@ public class AutonomousRedWarehouse extends LinearOpMode {
         int foreArmDegree;
         int foreforeArmDumpDegree;
         if (tsePos == 1) {
-            backArmDegree = 180;
-            foreArmDegree = 210;
-            foreforeArmDumpDegree = 160;
+            backArmDegree = 235;
+            foreArmDegree = 136;
+            foreforeArmDumpDegree = 157;
             //bottom
         } else if (tsePos == 2) {
             backArmDegree = 218;
@@ -236,7 +233,7 @@ public class AutonomousRedWarehouse extends LinearOpMode {
         backArm.setVelocity(3500);
         foreArm.setTargetPosition(Common.foreArmAngleToEncoder(foreArmDegree));
         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(3500);
+        foreArm.setVelocity(700);
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(700);
@@ -290,12 +287,17 @@ public class AutonomousRedWarehouse extends LinearOpMode {
                 // go back to shipping hub
                 drive.followTrajectorySequence(trajseq5);
                 // lift arm and dump
-                backArm.setTargetPosition(Common.backArmAngleToEncoder(170));
+                backArm.setTargetPosition(Common.backArmAngleToEncoder(155));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 backArm.setVelocity(4000);
+
+                while (!Common.isInPosition(backArm)) {
+                    drive.update();
+                }
+                backArm.setVelocity(0);
                 foreArm.setTargetPosition(Common.foreArmAngleToEncoder(129));
                 foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreArm.setVelocity(4000);
+                foreArm.setVelocity(1500);
                 foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 foreforeArm.setVelocity(400);
@@ -307,17 +309,12 @@ public class AutonomousRedWarehouse extends LinearOpMode {
                     drive.update();
                 }
                 foreArm.setVelocity(0);
-                while (!Common.isInPosition(backArm)) {
-                    drive.update();
-                }
-                backArm.setVelocity(0);
                 foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(180));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 foreforeArm.setVelocity(500);
                 while (!Common.isInPosition(foreforeArm)) {
                     sleep(50);
                 }
-
                 // 2nd drive back to warehouse and put arm back in
                 followTrajectoryAndPutArmBackIn(trajseq6);
             }

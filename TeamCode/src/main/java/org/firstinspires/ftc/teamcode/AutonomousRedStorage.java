@@ -50,8 +50,8 @@ public class AutonomousRedStorage extends LinearOpMode {
     public static double SHIPPING_HUB_X = -36;
     public static double SHIPPING_HUB_Y = -48;
     public static double SHIPPING_HUB_ANGLE = 45;
-    public static double STORAGE_X = -60;
-    public static double STORAGE_Y = -34;
+    public static double STORAGE_X = -58;
+    public static double STORAGE_Y = -35;
     public static double STORAGE_ANGLE = 0;
 
     // Green Range                                      Y      Cr     Cb
@@ -170,11 +170,11 @@ public class AutonomousRedStorage extends LinearOpMode {
             //bottom
         }else if (tsePos == 2){
             backArmDegree = 180;
-            foreArmDegree = 175;
+            foreArmDegree = 170;
             foreforeArmDumpDegree = 170;
             //mid
         }else {
-            backArmDegree = 150;
+            backArmDegree = 160;
             foreArmDegree = 129;
             foreforeArmDumpDegree = 218;
             //top

@@ -21,7 +21,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Config
 @Autonomous
-public class AutonomousRun extends LinearOpMode {
+public class AutonomousBlueStorage extends LinearOpMode {
 
     private DcMotorEx foreforeArm;
     private DcMotorEx foreArm;
@@ -52,7 +52,7 @@ public class AutonomousRun extends LinearOpMode {
     public static double SHIPPING_HUB_ANGLE = -45;
     public static double STORAGE_X = -60;
     public static double STORAGE_Y = 36;
-    public static double STORAGE_ANGLE = -180;
+    public static double STORAGE_ANGLE = 0;
 
     // Green Range                                      Y      Cr     Cb
     public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
@@ -113,7 +113,7 @@ public class AutonomousRun extends LinearOpMode {
         Trajectory traj2 = drive.trajectoryBuilder(traj1.end(), true)
                 .splineTo(new Vector2d(SHIPPING_HUB_X, SHIPPING_HUB_Y), Math.toRadians(SHIPPING_HUB_ANGLE))
                 .build();
-        Trajectory traj3 = drive.trajectoryBuilder(traj2.end(), true)
+        Trajectory traj3 = drive.trajectoryBuilder(traj2.end())
                 .splineTo(new Vector2d(STORAGE_X, STORAGE_Y), Math.toRadians(STORAGE_ANGLE))
                 .build();
 
@@ -182,7 +182,7 @@ public class AutonomousRun extends LinearOpMode {
         backArm.setVelocity(1000);
         foreArm.setTargetPosition(Common.foreArmAngleToEncoder(foreArmDegree));
         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(1000);
+        foreArm.setVelocity(700);
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(200);
