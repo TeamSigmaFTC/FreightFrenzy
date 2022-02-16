@@ -23,10 +23,13 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+
+import java.util.Collection;
 
 @Config
 @Autonomous
@@ -68,8 +71,14 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
     public static double FOREARM_SPEED = 700;
 
     // Green Range                                      Y      Cr     Cb
-    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
-    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 120.0, 120.0);
+//    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
+//    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 120.0, 120.0);
+    // red range
+//    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 170.0, 0.0);
+//    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 255.0, 150.0);
+    // blue range
+    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 150);
+    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 160.0, 255.0);
     private ColorSensor sensorColor;
     private DistanceSensor sensorDistance;
     private RevBlinkinLedDriver blinkinLedDriver;
@@ -102,7 +111,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         //OpenCV Pipeline
 
-        pipeline = new ContourPipeline(0.2, 0.2, 0.2, 0.2);
+        pipeline = new ContourPipeline(0, 0, 0.5, 0);
 
         pipeline.configureScalarLower(scalarLowerYCrCb.val[0], scalarLowerYCrCb.val[1], scalarLowerYCrCb.val[2]);
         pipeline.configureScalarUpper(scalarUpperYCrCb.val[0], scalarUpperYCrCb.val[1], scalarUpperYCrCb.val[2]);
@@ -128,9 +137,6 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         Trajectory traj1 = drive.trajectoryBuilder(startPose)
                 .splineTo(new Vector2d(SHIPPING_HUB_X, SHIPPING_HUB_Y), Math.toRadians(SHIPPING_HUB_ANGLE))
                 .build();
-//        Trajectory traj2 = drive.trajectoryBuilder(traj1.end(),true)
-//                .splineTo(new Vector2d(TRANSITION1_X, TRANSITION1_Y), Math.toRadians(TRANSITION1_ANGLE))
-//                .build();
         TrajectorySequence trajseq3 = drive.trajectorySequenceBuilder((traj1.end()))
                 .splineTo(new Vector2d(TRANSITION_X, TRANSITION_Y), Math.toRadians(TRANSITION_ANGLE))
                 .splineTo(new Vector2d(WAREHOUSE_X, WAREHOUSE_Y), Math.toRadians(WAREHOUSE_ANGLE))
@@ -179,31 +185,39 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         if (isStopRequested()) return;
 
         resetStartTime();
-        while (getRuntime() < 3) {
+        resetStartTime();
+        while (getRuntime() < 1) {
             if (pipeline.error) {
                 telemetry.addData("Exception: ", pipeline.debug.getStackTrace());
             }
-            double rectangleArea = pipeline.getRectArea();
 
-            //Print out the area of the rectangle that is found.
-//            telemetry.addData("Rectangle Area", rectangleArea);
-            //Check to see if the rectangle has a large enough area to be a marker.
-            if (rectangleArea > minRectangleArea) {
-                double cameraWidth = pipeline.getCameraWidth();
-                //Then check the location of the rectangle to see which barcode it is in.
-                if (pipeline.getRectMidpointX() > rightBarcodeRangeBoundary * cameraWidth) {
-                    telemetry.addData("Barcode Position", "Right");
-                    tsePos = 3;
-                    break;
-                } else if (pipeline.getRectMidpointX() < leftBarcodeRangeBoundary * cameraWidth) {
-                    telemetry.addData("Barcode Position", "Left");
-                    tsePos = 1;
-                    break;
+            double cameraWidth = pipeline.getCameraWidth();
+            boolean foundRight = false;
+            boolean foundLeft = false;
+            boolean foundCenter = false;
+            Collection<Rect> rects = pipeline.getRects();
+            for(Rect rect: rects){
+                double x = pipeline.getRectMidpointX(rect);
+                if(x > rightBarcodeRangeBoundary * cameraWidth) {
+                    foundRight = true;
+                } else if (x < leftBarcodeRangeBoundary * cameraWidth) {
+                    foundLeft = true;
                 } else {
-                    telemetry.addData("Barcode Position", "Center");
-                    tsePos = 2;
-                    break;
+                    foundCenter = true;
                 }
+            }
+            if(!foundLeft && foundCenter && foundRight) {
+                telemetry.addData("Barcode Position", "Left");
+                tsePos = 1;
+                break;
+            } else if (!foundCenter && foundLeft && foundRight) {
+                telemetry.addData("Barcode Position", "Center");
+                tsePos = 2;
+                break;
+            } else if (!foundRight && foundLeft && foundCenter) {
+                telemetry.addData("Barcode Position", "Right");
+                tsePos = 3;
+                break;
             }
         }
         telemetry.update();
@@ -225,8 +239,8 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
             foreforeArmDumpDegree = 150;
             //mid
         } else {
-            backArmDegree = 150;
-            foreArmDegree = 129;
+            backArmDegree = 180;
+            foreArmDegree = 135;
             foreforeArmDumpDegree = 200;
             //top
         }

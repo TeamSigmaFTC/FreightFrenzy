@@ -79,11 +79,11 @@ public class AutonomousRemote extends LinearOpMode {
 //    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
 //    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 120.0, 120.0);
     // red range
-//    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 170.0, 0.0);
-//    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 255.0, 150.0);
+    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 170.0, 0.0);
+    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 255.0, 150.0);
     // blue range
-    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 150);
-    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 160.0, 255.0);
+//    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 150);
+//    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 160.0, 255.0);
     private ColorSensor sensorColor;
     private DistanceSensor sensorDistance;
     private RevBlinkinLedDriver blinkinLedDriver;

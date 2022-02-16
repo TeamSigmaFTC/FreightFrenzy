@@ -14,10 +14,13 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+
+import java.util.Collection;
 
 @Config
 @Autonomous
@@ -55,9 +58,14 @@ public class AutonomousBlueStorage extends LinearOpMode {
     public static double STORAGE_ANGLE = 0;
 
     // Green Range                                      Y      Cr     Cb
-    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
-    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 120.0, 120.0);
-
+//    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
+//    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 120.0, 120.0);
+    // red range
+//    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 170.0, 0.0);
+//    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 255.0, 150.0);
+    // blue range
+    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 150);
+    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 160.0, 255.0);
 
 
     @Override
@@ -78,7 +86,7 @@ public class AutonomousBlueStorage extends LinearOpMode {
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         //OpenCV Pipeline
 
-        pipeline = new ContourPipeline(0.2, 0.2, 0.2, 0.2);
+        pipeline  = new ContourPipeline(0, 0, 0.5, 0);
 
         pipeline.configureScalarLower(scalarLowerYCrCb.val[0], scalarLowerYCrCb.val[1], scalarLowerYCrCb.val[2]);
         pipeline.configureScalarUpper(scalarUpperYCrCb.val[0], scalarUpperYCrCb.val[1], scalarUpperYCrCb.val[2]);
@@ -119,32 +127,39 @@ public class AutonomousBlueStorage extends LinearOpMode {
 
         waitForStart();
         if (isStopRequested()) return;
-        //getRuntime() < 2
-        while (true) {
+        resetStartTime();
+        while (getRuntime() < 1) {
             if (pipeline.error) {
                 telemetry.addData("Exception: ", pipeline.debug.getStackTrace());
             }
-            double rectangleArea = pipeline.getRectArea();
 
-            //Print out the area of the rectangle that is found.
-            telemetry.addData("Rectangle Area", rectangleArea);
-            //Check to see if the rectangle has a large enough area to be a marker.
-            if (rectangleArea > minRectangleArea) {
-                double cameraWidth = pipeline.getCameraWidth();
-                //Then check the location of the rectangle to see which barcode it is in.
-                if (pipeline.getRectMidpointX() > rightBarcodeRangeBoundary * cameraWidth) {
-                    telemetry.addData("Barcode Position", "Right");
-                    tsePos = 3;
-                    break;
-                } else if (pipeline.getRectMidpointX() < leftBarcodeRangeBoundary * cameraWidth) {
-                    telemetry.addData("Barcode Position", "Left");
-                    tsePos = 1;
-                    break;
+            double cameraWidth = pipeline.getCameraWidth();
+            boolean foundRight = false;
+            boolean foundLeft = false;
+            boolean foundCenter = false;
+            Collection<Rect> rects = pipeline.getRects();
+            for(Rect rect: rects){
+                double x = pipeline.getRectMidpointX(rect);
+                if(x > rightBarcodeRangeBoundary * cameraWidth) {
+                    foundRight = true;
+                } else if (x < leftBarcodeRangeBoundary * cameraWidth) {
+                    foundLeft = true;
                 } else {
-                    telemetry.addData("Barcode Position", "Center");
-                    tsePos = 2;
-                    break;
+                    foundCenter = true;
                 }
+            }
+            if(!foundLeft && foundCenter && foundRight) {
+                telemetry.addData("Barcode Position", "Left");
+                tsePos = 1;
+                break;
+            } else if (!foundCenter && foundLeft && foundRight) {
+                telemetry.addData("Barcode Position", "Center");
+                tsePos = 2;
+                break;
+            } else if (!foundRight && foundLeft && foundCenter) {
+                telemetry.addData("Barcode Position", "Right");
+                tsePos = 3;
+                break;
             }
         }
         telemetry.update();
