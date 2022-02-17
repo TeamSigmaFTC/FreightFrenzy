@@ -155,10 +155,12 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                 .addTemporalMarker(() -> intake.setPower(0))
                 .build();
         TrajectorySequence trajseq5 = drive.trajectorySequenceBuilder(trajseq4.end())
-                .setTangent(Math.toRadians(180))
                 .addTemporalMarker(() -> intake.setPower(0.5))
-                .splineTo(new Vector2d(5, trajseq4.end().getY() - 10), Math.toRadians(-120))
                 .UNSTABLE_addTemporalMarkerOffset(0.5, () -> intake.setPower(0))
+                .back(4)
+                .strafeLeft(2)
+                .setTangent(Math.toRadians(180))
+                .splineTo(new Vector2d(5, trajseq4.end().getY() - 10), Math.toRadians(-120))
                 .build();
         TrajectorySequence trajseq6 = drive.trajectorySequenceBuilder(trajseq5.end())
                 .splineTo(new Vector2d(trajseq4.end().getX(), trajseq4.end().getY()), Math.toRadians(0))

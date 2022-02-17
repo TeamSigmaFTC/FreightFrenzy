@@ -136,9 +136,6 @@ public class AutonomousRedWarehouse extends LinearOpMode {
         Trajectory traj1 = drive.trajectoryBuilder(startPose)
                 .splineTo(new Vector2d(SHIPPING_HUB_X, SHIPPING_HUB_Y), Math.toRadians(SHIPPING_HUB_ANGLE))
                 .build();
-//        Trajectory traj2 = drive.trajectoryBuilder(traj1.end(),true)
-//                .splineTo(new Vector2d(TRANSITION1_X, TRANSITION1_Y), Math.toRadians(TRANSITION1_ANGLE))
-//                .build();
         TrajectorySequence trajseq3 = drive.trajectorySequenceBuilder((traj1.end()))
                 .splineTo(new Vector2d(TRANSITION_X, TRANSITION_Y), Math.toRadians(TRANSITION_ANGLE))
                 .splineTo(new Vector2d(WAREHOUSE_X, WAREHOUSE_Y), Math.toRadians(WAREHOUSE_ANGLE))
@@ -157,6 +154,10 @@ public class AutonomousRedWarehouse extends LinearOpMode {
                 .addTemporalMarker(() -> intake.setPower(0))
                 .build();
         TrajectorySequence trajseq5 = drive.trajectorySequenceBuilder(trajseq4.end())
+                .back(4)
+                .addTemporalMarker(() -> intake.setPower(0.5))
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> intake.setPower(0))
+                .strafeRight(2)
                 .setTangent(Math.toRadians(180))
                 .splineTo(new Vector2d(5, trajseq4.end().getY() + 10), Math.toRadians(120))
                 .build();
