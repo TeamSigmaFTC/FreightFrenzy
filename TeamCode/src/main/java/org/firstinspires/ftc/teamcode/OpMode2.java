@@ -162,10 +162,10 @@ public class OpMode2 extends LinearOpMode {
         boolean lastBlue = false;
         boolean lastShared = false;
 
-        float BackArmDown;
         float ForeArmUp;
         float lastForeArmUp = 0;
-        boolean ForeArmDown;
+        boolean fastSpeedButton;
+        boolean slowSpeedButton;
         boolean FFArmUp;
         boolean FFArmDown;
         double intakeRun;
@@ -179,6 +179,8 @@ public class OpMode2 extends LinearOpMode {
         boolean spinBlue;
         boolean sharedPos;
 
+        double speedMultipler = 0.7;
+
 
         //While the control program is active, the following will run
         while (opModeIsActive()) {
@@ -188,6 +190,8 @@ public class OpMode2 extends LinearOpMode {
             FFArmUp = this.gamepad2.dpad_down;
             intakeRun = this.gamepad1.right_trigger;
             outakeRun = this.gamepad1.left_trigger;
+            fastSpeedButton = this.gamepad1.dpad_up;
+            slowSpeedButton = this.gamepad1.dpad_down;
             pickUpPos = this.gamepad2.b; //this.gamepad2.left_bumper;
             topPos = this.gamepad2.x; //this.gamepad2.right_bumper;
             lowPos = this.gamepad2.y; //this.gamepad2.b;
@@ -236,6 +240,11 @@ public class OpMode2 extends LinearOpMode {
             y = gamepad1.left_stick_y;
             switch (currentDriveMode) {
                 case NONE:
+                    if(slowSpeedButton) {
+                        speedMultipler = 0.7;
+                    } else if (fastSpeedButton) {
+                        speedMultipler = 1;
+                    }
                     Pose2d poseEstimate = drive.getPoseEstimate();
                     Vector2d input = new Vector2d(
                             //Squares power, to allow for more precise robot control
@@ -245,8 +254,8 @@ public class OpMode2 extends LinearOpMode {
                     turning = gamepad1.right_stick_x;
                     drive.setWeightedDrivePower(
                             new Pose2d(
-                                    input.getX() * 0.7,
-                                    input.getY() * 0.7,
+                                    input.getX() * speedMultipler,
+                                    input.getY() * speedMultipler,
                                     //Squares turning power, to allow for more precise robot control
                                     turning * turning * (turning > 0 ? -1 : 1) * .6));
 //                    if (gamepad1.y) {

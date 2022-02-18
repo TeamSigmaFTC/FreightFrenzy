@@ -23,8 +23,12 @@ public class Common {
         return (int) Math.round(-FORE_ARM_ENCODER_ANGLE_RATIO * (FORE_ARM_STARTING_ANGLE - degree));
     }
 
-    public static int foreArmEncoderToAngle(int encoder) {
-        return (int) Math.round(FORE_ARM_STARTING_ANGLE + encoder/FORE_ARM_ENCODER_ANGLE_RATIO);
+    public static double foreArmEncoderToAngle(int encoder) {
+        return FORE_ARM_STARTING_ANGLE + encoder/FORE_ARM_ENCODER_ANGLE_RATIO;
+    }
+
+    public static double foreArmEncoderVelocityToAngleVelocity(double velocity) {
+        return velocity/FORE_ARM_ENCODER_ANGLE_RATIO;
     }
 
     public static int foreforeArmAngleToEncoder(int degree) {
