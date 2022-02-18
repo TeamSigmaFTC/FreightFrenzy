@@ -151,13 +151,12 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                 })
                 .addTemporalMarker(() -> intake.setPower(-1))
                 .forward(4)
-                .waitSeconds(0.5) // extra 0.5 seconds to make sure one is picked up
+                .waitSeconds(0.4) // extra 0.5 seconds to make sure one is picked up
                 .addTemporalMarker(() -> intake.setPower(0))
                 .build();
         TrajectorySequence trajseq5 = drive.trajectorySequenceBuilder(trajseq4.end())
                 .addTemporalMarker(() -> intake.setPower(0.5))
-                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> intake.setPower(0))
-                .back(4)
+                .UNSTABLE_addTemporalMarkerOffset(0.3, () -> intake.setPower(0))
                 .strafeLeft(2)
                 .setTangent(Math.toRadians(180))
                 .splineTo(new Vector2d(5, trajseq4.end().getY() - 10), Math.toRadians(-120))
@@ -252,7 +251,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         backArm.setVelocity(3500);
         foreArm.setTargetPosition(Common.foreArmAngleToEncoder(foreArmDegree));
         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(FOREARM_SPEED);
+        foreArm.setVelocity(1500);
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(700);
