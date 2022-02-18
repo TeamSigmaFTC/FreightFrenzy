@@ -156,7 +156,7 @@ public class OpMode2 extends LinearOpMode {
 
         boolean lastPickUp = false;
         boolean lastTop = false;
-        boolean lastMid = false;
+        boolean lastLow = false;
         boolean lastCap = false;
         boolean lastRed = false;
         boolean lastBlue = false;
@@ -172,7 +172,7 @@ public class OpMode2 extends LinearOpMode {
         double outakeRun;
         boolean pickUpPos;
         boolean topPos;
-        boolean midPos;
+        boolean lowPos;
         boolean capPos;
         boolean eStop;
         boolean spinRed;
@@ -190,9 +190,9 @@ public class OpMode2 extends LinearOpMode {
             outakeRun = this.gamepad1.left_trigger;
             pickUpPos = this.gamepad2.b; //this.gamepad2.left_bumper;
             topPos = this.gamepad2.x; //this.gamepad2.right_bumper;
-            midPos = this.gamepad2.y; //this.gamepad2.b;
-            capPos = this.gamepad2.left_bumper;
-            eStop  = this.gamepad2.left_stick_button;
+            lowPos = this.gamepad2.y; //this.gamepad2.b;
+            capPos = this.gamepad2.right_bumper;
+            eStop  = this.gamepad1.left_bumper || this.gamepad2.left_bumper;
             spinRed = this.gamepad1.a;
             spinBlue = this.gamepad1.b;
             sharedPos = this.gamepad2.dpad_right;
@@ -240,15 +240,15 @@ public class OpMode2 extends LinearOpMode {
                     Vector2d input = new Vector2d(
                             //Squares power, to allow for more precise robot control
                             y * y * (y > 0 ? -1 : 1),
-                            x * x * (x > 0 ? -1 : 1)).rotated(-poseEstimate.getHeading() - Math.PI/2);
+                            x * x * (x > 0 ? -1 : 1));//.rotated(-poseEstimate.getHeading() - Math.PI/2);
 
                     turning = gamepad1.right_stick_x;
                     drive.setWeightedDrivePower(
                             new Pose2d(
-                                    input.getX(),
-                                    input.getY(),
+                                    input.getX() * 0.7,
+                                    input.getY() * 0.7,
                                     //Squares turning power, to allow for more precise robot control
-                                    turning * turning * (turning > 0 ? -1 : 1)));
+                                    turning * turning * (turning > 0 ? -1 : 1) * .6));
 //                    if (gamepad1.y) {
 //                        currentDriveMode = DriveMode.AUTO;
 //                        drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -384,7 +384,7 @@ public class OpMode2 extends LinearOpMode {
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 backArm.setVelocity(3000);
                 currentArmMode = ArmMode.TOP_TRAY_POS_MOVE;
-                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(129));
+                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(110));
                 foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 foreArm.setVelocity(700);
                 foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(60));
@@ -393,33 +393,33 @@ public class OpMode2 extends LinearOpMode {
             }
             lastTop = topPos;
 
-            boolean midPosPress = midPos && !lastMid;
-            if (midPosPress) {
-                //Moves arm to a position to deposit the freight in the middle level
-//                backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
+            boolean lowPosPress = lowPos && !lastLow;
+            if (lowPosPress) {
+                //Moves arm to a position to deposit the freight in the low level
+                backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
+                backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                backArm.setVelocity(2000);
+                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(280));
+                foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                foreArm.setVelocity(800);
+                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
+                foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                foreforeArm.setVelocity(400);
+            }
+            lastLow = lowPos;
+
+            boolean capPosPress = capPos && !lastCap;
+            if (capPosPress) {
+                //Moves arm to a position to cap the team element
+//                backArm.setTargetPosition(Common.backArmAngleToEncoder(100));
 //                backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //                backArm.setVelocity(2000);
-//                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(145));
+//                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(150));
 //                foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //                foreArm.setVelocity(2000);
 //                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
 //                foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //                foreforeArm.setVelocity(400);
-            }
-            lastMid = midPos;
-
-            boolean capPosPress = capPos && !lastCap;
-            if (capPosPress) {
-                //Moves arm to a position to cap the team element
-                backArm.setTargetPosition(Common.backArmAngleToEncoder(100));
-                backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                backArm.setVelocity(2000);
-                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(150));
-                foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreArm.setVelocity(2000);
-                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
-                foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreforeArm.setVelocity(400);
             }
             lastCap = capPos;
 
@@ -529,7 +529,7 @@ public class OpMode2 extends LinearOpMode {
                 telemetry.addData("pose t265", drive.getPoseEstimate());
                 telemetry.addData("pose", ((LocalizerT265)drive.getLocalizer()).defaultLocalizer.getPoseEstimate());
             }
-            telemetry.addData("estop", eStop);
+//            telemetry.addData("estop", eStop);
             telemetry.addData("currentMode", currentArmMode.toString());
             telemetry.addData("backArm angle", Common.backArmEncoderToAngle(backArm.getCurrentPosition()));
             telemetry.addData("foreArm angle", Common.foreArmEncoderToAngle(foreArm.getCurrentPosition()));
