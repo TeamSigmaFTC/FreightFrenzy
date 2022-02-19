@@ -136,6 +136,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
 
         Trajectory traj1 = drive.trajectoryBuilder(startPose)
                 .splineTo(new Vector2d(SHIPPING_HUB_X, SHIPPING_HUB_Y), Math.toRadians(SHIPPING_HUB_ANGLE))
+//                .lineToLinearHeading(new Pose2d(SHIPPING_HUB_X, SHIPPING_HUB_Y, Math.toRadians(SHIPPING_HUB_ANGLE)))
                 .build();
         TrajectorySequence trajseq3 = drive.trajectorySequenceBuilder((traj1.end()))
                 .splineTo(new Vector2d(TRANSITION_X, TRANSITION_Y), Math.toRadians(TRANSITION_ANGLE))
@@ -230,7 +231,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         int foreArmDegree;
         int foreforeArmDumpDegree;
         if (tsePos == 1) {
-            backArmDegree = 235;
+            backArmDegree = 225;
             foreArmDegree = 136;
             foreforeArmDumpDegree = 157;
             //bottom
@@ -251,10 +252,10 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         backArm.setVelocity(3500);
         foreArm.setTargetPosition(Common.foreArmAngleToEncoder(foreArmDegree));
         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(1500);
+        foreArm.setVelocity(1200);
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(700);
+        foreforeArm.setVelocity(800);
 
         while (!Common.isInPosition(backArm)) {
             sleep(50);
@@ -301,7 +302,9 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                     intakeSuccess = true;
                 }
             }
-
+            if (cycle == 2){
+                break;
+            }
             if (intakeSuccess) {
                 // go back to shipping hub
                 drive.followTrajectorySequence(trajseq5);
@@ -319,7 +322,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                 foreArm.setVelocity(1500);
                 foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreforeArm.setVelocity(400);
+                foreforeArm.setVelocity(800);
                 while (!Common.isInPosition(foreforeArm)) {
                     drive.update();
                 }

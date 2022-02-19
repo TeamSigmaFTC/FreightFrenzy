@@ -228,7 +228,7 @@ public class AutonomousRedWarehouse extends LinearOpMode {
         int foreArmDegree;
         int foreforeArmDumpDegree;
         if (tsePos == 1) {
-            backArmDegree = 235;
+            backArmDegree = 225;
             foreArmDegree = 136;
             foreforeArmDumpDegree = 157;
             //bottom
@@ -249,7 +249,7 @@ public class AutonomousRedWarehouse extends LinearOpMode {
         backArm.setVelocity(3500);
         foreArm.setTargetPosition(Common.foreArmAngleToEncoder(foreArmDegree));
         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(1500);
+        foreArm.setVelocity(1200);
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(700);
@@ -313,7 +313,7 @@ public class AutonomousRedWarehouse extends LinearOpMode {
                 backArm.setVelocity(0);
                 foreArm.setTargetPosition(Common.foreArmAngleToEncoder(129));
                 foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreArm.setVelocity(1500);
+                foreArm.setVelocity(1200);
                 foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 foreforeArm.setVelocity(400);
