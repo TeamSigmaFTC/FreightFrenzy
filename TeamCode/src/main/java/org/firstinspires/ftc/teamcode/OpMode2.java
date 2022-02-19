@@ -93,8 +93,8 @@ public class OpMode2 extends LinearOpMode {
 //        drive.useT265(hardwareMap);
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        backArm.setTargetPositionTolerance(30);
-        foreArm.setTargetPositionTolerance(30);
+        backArm.setTargetPositionTolerance(10);
+        foreArm.setTargetPositionTolerance(15);
 
         if(magnet.isPressed()) {
             backArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
