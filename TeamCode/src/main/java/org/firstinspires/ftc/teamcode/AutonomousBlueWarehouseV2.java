@@ -62,13 +62,13 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
     public static double SHIPPING_HUB_X = -5;
     public static double SHIPPING_HUB_Y = 57;
     public static double SHIPPING_HUB_ANGLE = 70;
-    public static double TRANSITION_X = 12;
+    public static double TRANSITION_X = 15;
     public static double TRANSITION_Y = 66;
     public static double TRANSITION_ANGLE = 0;
     public static double WAREHOUSE_X = 43;
     public static double WAREHOUSE_Y = 66.5;
     public static double WAREHOUSE_ANGLE = 0;
-    public static double FOREARM_SPEED = 700;
+
 
     // Green Range                                      Y      Cr     Cb
 //    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
