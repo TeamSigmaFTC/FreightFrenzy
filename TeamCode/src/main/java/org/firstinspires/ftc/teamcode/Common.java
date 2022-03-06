@@ -9,7 +9,7 @@ public class Common {
 
     private static double FORE_ARM_ENCODER_ANGLE_RATIO = ((1.0+(46.0/17.0)) * 28.0) * 28.0 / 360.0;
     public static double FORE_ARM_STARTING_ANGLE = 20;
-    private static double FORE_FORE_ARM_ENCODER_ANGLE_RATIO = 3.61 * 3.61 * 28.0 / 360.0;
+    private static double FORE_FORE_ARM_ENCODER_ANGLE_RATIO = 2.89 * 3.61 * 3.61 * 28.0 / 360.0;
     public static double FORE_FORE_ARM_STARTING_ANGLE = 73;
     public static int backArmAngleToEncoder(int degree) {
         return (int) Math.round(BACK_ARM_ENCODER_ANGLE_RATIO*(BACK_ARM_STARTING_ANGLE - degree));
@@ -33,11 +33,11 @@ public class Common {
     }
 
     public static int foreforeArmAngleToEncoder(int degree) {
-        return (int) Math.round(FORE_FORE_ARM_ENCODER_ANGLE_RATIO*(FORE_FORE_ARM_STARTING_ANGLE-degree));
+        return (int) Math.round(-FORE_FORE_ARM_ENCODER_ANGLE_RATIO*(FORE_FORE_ARM_STARTING_ANGLE-degree));
     }
 
     public static int foreforeArmEncoderToAngle(int encoder) {
-        return (int) Math.round(FORE_FORE_ARM_STARTING_ANGLE - encoder/FORE_FORE_ARM_ENCODER_ANGLE_RATIO);
+        return (int) Math.round(FORE_FORE_ARM_STARTING_ANGLE + encoder/FORE_FORE_ARM_ENCODER_ANGLE_RATIO);
     }
 
     public static boolean isInPosition(DcMotorEx motor) {
