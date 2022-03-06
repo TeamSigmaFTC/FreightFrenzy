@@ -96,11 +96,11 @@ public class OpMode2 extends LinearOpMode {
         backArm.setTargetPositionTolerance(10);
         foreArm.setTargetPositionTolerance(15);
 
-        if(magnet.isPressed()) {
+//        if(magnet.isPressed()) {
             backArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             foreArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             foreforeArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        }
+//        }
 
         backArm.setCurrentAlert(5, CurrentUnit.AMPS);
         foreArm.setCurrentAlert(5, CurrentUnit.AMPS);
@@ -257,7 +257,7 @@ public class OpMode2 extends LinearOpMode {
                                     input.getX() * speedMultipler,
                                     input.getY() * speedMultipler,
                                     //Squares turning power, to allow for more precise robot control
-                                    turning * turning * (turning > 0 ? -1 : 1) * .6));
+                                    turning * turning * (turning > 0 ? -1 : 1) * .7));
 //                    if (gamepad1.y) {
 //                        currentDriveMode = DriveMode.AUTO;
 //                        drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -315,7 +315,7 @@ public class OpMode2 extends LinearOpMode {
                         backArm.setVelocity(0);
                         foreforeArm.setVelocity(0);
                         currentArmMode = ArmMode.INTAKE_ARM_FORE_MOVE;
-                        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(310));
+                        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(355));
                         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         foreArm.setVelocity(4500);
                     }
@@ -324,7 +324,7 @@ public class OpMode2 extends LinearOpMode {
                     if (Common.isInPosition(foreArm)) {
                         foreArm.setVelocity(0);
                         currentArmMode = ArmMode.INTAKE_ARM_BACK_MOVE_2;
-                        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(-17));
+                        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(285));
                         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         foreforeArm.setVelocity(1000);
                     }
@@ -332,42 +332,44 @@ public class OpMode2 extends LinearOpMode {
                 case INTAKE_ARM_BACK_MOVE_2:
                     if (Common.isInPosition(foreforeArm)){
                         foreforeArm.setVelocity(0);
-                        backArm.setTargetPosition(Common.backArmAngleToEncoder(218));
+                        backArm.setTargetPosition(Common.backArmAngleToEncoder(228));
                         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         backArm.setVelocity(4000);
-                        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(325));
-                        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        foreArm.setVelocity(4500);
-
-                        currentArmMode = ArmMode.INTAKE_ARM_BACK_MOVE_3;
-                    }
-                    break;
-                case INTAKE_ARM_BACK_MOVE_3:
-                    if (Common.isInPosition(backArm) && Common.isInPosition(foreArm)) {
-                        backArm.setVelocity(0);
-                        foreArm.setVelocity(0);
-                        currentArmMode = ArmMode.NONE;
-                    }
-                    break;
-                case TOP_TRAY_POS_MOVE:
-                    if (Common.isInPosition(backArm)) {
-                        backArm.setVelocity(0);
-                        currentArmMode = ArmMode.TOP_TRAY_POS_MOVE_2;
-//                        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(129));
+//                        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(325));
 //                        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        foreArm.setVelocity(2000);
-//                        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
-//                        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        foreforeArm.setVelocity(400);
-                    }
-                    break;
-                case TOP_TRAY_POS_MOVE_2:
-                    if(Common.isInPosition(foreArm) && Common.isInPosition(foreforeArm)) {
-                        foreArm.setVelocity(0);
-                        foreforeArm.setVelocity(0);
+//                        foreArm.setVelocity(4500);
+
+//                        currentArmMode = ArmMode.INTAKE_ARM_BACK_MOVE_3;
                         currentArmMode = ArmMode.NONE;
+
                     }
                     break;
+//                case INTAKE_ARM_BACK_MOVE_3:
+//                    if (Common.isInPosition(backArm) && Common.isInPosition(foreArm)) {
+//                        backArm.setVelocity(0);
+//                        foreArm.setVelocity(0);
+//                        currentArmMode = ArmMode.NONE;
+//                    }
+//                    break;
+//                case TOP_TRAY_POS_MOVE:
+//                    if (Common.isInPosition(backArm)) {
+//                        backArm.setVelocity(0);
+//                        currentArmMode = ArmMode.TOP_TRAY_POS_MOVE_2;
+////                        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(129));
+////                        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                        foreArm.setVelocity(2000);
+////                        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
+////                        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                        foreforeArm.setVelocity(400);
+//                    }
+//                    break;
+//                case TOP_TRAY_POS_MOVE_2:
+//                    if(Common.isInPosition(foreArm) && Common.isInPosition(foreforeArm)) {
+//                        foreArm.setVelocity(0);
+//                        foreforeArm.setVelocity(0);
+//                        currentArmMode = ArmMode.NONE;
+//                    }
+//                    break;
             }
 
             boolean pickUpPress = pickUpPos && !lastPickUp;
@@ -392,11 +394,11 @@ public class OpMode2 extends LinearOpMode {
                 backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 backArm.setVelocity(3000);
-                currentArmMode = ArmMode.TOP_TRAY_POS_MOVE;
-                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(110));
+//                currentArmMode = ArmMode.TOP_TRAY_POS_MOVE;
+                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(180));
                 foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 foreArm.setVelocity(700);
-                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(60));
+                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(430));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 foreforeArm.setVelocity(200);
             }
