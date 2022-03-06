@@ -60,7 +60,7 @@ public class SampleMecanumDrive extends MecanumDrive {
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(8, 0, 0);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(8, 0, 0);
 
-    public static double LATERAL_MULTIPLIER = 1.1117;
+    public static double LATERAL_MULTIPLIER = 1.1482;
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
@@ -119,7 +119,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         // and the placement of the dot/orientation from https://docs.revrobotics.com/rev-control-system/control-system-overview/dimensions#imu-location
         //
         // For example, if +Y in this diagram faces downwards, you would use AxisDirection.NEG_Y.
-        BNO055IMUUtil.remapZAxis(imu, AxisDirection.NEG_Y);
+        BNO055IMUUtil.remapZAxis(imu, AxisDirection.POS_Y);
 //        BNO055IMUUtil.remapAxes(imu, AxesOrder.ZYX, AxesSigns.PPP);
 
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
