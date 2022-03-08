@@ -47,11 +47,11 @@ public class AutonomousRedStorage extends LinearOpMode {
     private int tsePos = 0;
 
     protected Pose2d startPose = new Pose2d(-36, -63, Math.toRadians(90));
-    public static double SPINNER_X = -60;
-    public static double SPINNER_Y = -56;
-    public static double SPINNER_ANGLE = 270;
-    public static double SHIPPING_HUB_X = -36;
-    public static double SHIPPING_HUB_Y = -48;
+    public static double SPINNER_X = -57;
+    public static double SPINNER_Y = -58;
+    public static double SPINNER_ANGLE = 180;
+    public static double SHIPPING_HUB_X = -33;
+    public static double SHIPPING_HUB_Y = -45;
     public static double SHIPPING_HUB_ANGLE = 45;
     public static double STORAGE_X = -58;
     public static double STORAGE_Y = -35;
@@ -169,8 +169,8 @@ public class AutonomousRedStorage extends LinearOpMode {
 
         //drive to carousel and spin.
         drive.followTrajectory(traj1);
-        spinner.setPower(-1);
-        sleep(3000);
+        spinner.setPower(1);
+        sleep(2500);
         spinner.setPower(0);
 
         //drive to TSH and drop freight
@@ -180,41 +180,42 @@ public class AutonomousRedStorage extends LinearOpMode {
         int foreArmDegree;
         int foreforeArmDumpDegree;
         if (tsePos == 1) {
-            backArmDegree = 180;
-            foreArmDegree = 200;
-            foreforeArmDumpDegree = 180;
+            backArmDegree = 220;
+            foreArmDegree = 209;
+            foreforeArmDumpDegree = 13;
             //bottom
         }else if (tsePos == 2){
-            backArmDegree = 180;
-            foreArmDegree = 170;
-            foreforeArmDumpDegree = 170;
+            backArmDegree = 220;
+            foreArmDegree = 161;
+            foreforeArmDumpDegree = 26;
             //mid
         }else {
-            backArmDegree = 160;
-            foreArmDegree = 129;
-            foreforeArmDumpDegree = 218;
+            backArmDegree = 177;
+            foreArmDegree = 166;
+            foreforeArmDumpDegree = 13;
             //top
         }
         backArm.setTargetPosition(Common.backArmAngleToEncoder(backArmDegree));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backArm.setVelocity(1000);
-        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(foreArmDegree));
-        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(1000);
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(60));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(200);
+        while (!Common.isInPosition(foreforeArm)){
+            sleep(50);
+        }
+        foreforeArm.setVelocity(0);
         while (!Common.isInPosition(backArm)){
             sleep(50);
         }
         backArm.setVelocity(0);
+        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(foreArmDegree));
+        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        foreArm.setVelocity(1000);
         while (!Common.isInPosition(foreArm)){
             sleep(50);
         }
         foreArm.setVelocity(0);
-        while (!Common.isInPosition(foreforeArm)){
-            sleep(50);
-        }
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder( foreforeArmDumpDegree));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(200);
@@ -222,7 +223,7 @@ public class AutonomousRedStorage extends LinearOpMode {
             sleep(50);
         }
         //put arm back in
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder((int) Common.FORE_FORE_ARM_STARTING_ANGLE));
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(60));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(300);
 
@@ -245,6 +246,13 @@ public class AutonomousRedStorage extends LinearOpMode {
             sleep(50);
         }
         foreArm.setVelocity(0);
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder((int) Common.FORE_FORE_ARM_STARTING_ANGLE));
+        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        foreforeArm.setVelocity(300);
+
+        while (!Common.isInPosition(foreforeArm)){
+            sleep(50);
+        }
 
         //park
         drive.followTrajectory(traj3);
