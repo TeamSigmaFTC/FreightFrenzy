@@ -54,6 +54,7 @@ public class OpMode2 extends LinearOpMode {
         INTAKE_ARM_BACK_MOVE_3,
         TOP_TRAY_POS_MOVE,
         TOP_TRAY_POS_MOVE_2,
+        TOP_POS_FFA,
     }
 
     enum DriveMode {
@@ -324,7 +325,7 @@ public class OpMode2 extends LinearOpMode {
                     if (Common.isInPosition(foreArm)) {
                         foreArm.setVelocity(0);
                         currentArmMode = ArmMode.INTAKE_ARM_BACK_MOVE_2;
-                        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(285));
+                        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(205));
                         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         foreforeArm.setVelocity(1000);
                     }
@@ -332,7 +333,7 @@ public class OpMode2 extends LinearOpMode {
                 case INTAKE_ARM_BACK_MOVE_2:
                     if (Common.isInPosition(foreforeArm)){
                         foreforeArm.setVelocity(0);
-                        backArm.setTargetPosition(Common.backArmAngleToEncoder(228));
+                        backArm.setTargetPosition(Common.backArmAngleToEncoder(225));
                         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         backArm.setVelocity(4000);
 //                        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(325));
@@ -344,6 +345,17 @@ public class OpMode2 extends LinearOpMode {
 
                     }
                     break;
+                case TOP_POS_FFA: {
+                    if (Common.isInPosition(backArm)){
+                        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(180));
+                        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        foreArm.setVelocity(3000);
+                        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(103));
+                        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        foreforeArm.setVelocity(500);
+                        currentArmMode = ArmMode.NONE;
+                    }
+                    }
 //                case INTAKE_ARM_BACK_MOVE_3:
 //                    if (Common.isInPosition(backArm) && Common.isInPosition(foreArm)) {
 //                        backArm.setVelocity(0);
@@ -380,7 +392,7 @@ public class OpMode2 extends LinearOpMode {
                 backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 backArm.setVelocity(4000);
-                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
+                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(30));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 foreforeArm.setVelocity(700);
             }
@@ -391,16 +403,11 @@ public class OpMode2 extends LinearOpMode {
             boolean topPosPress = topPos && !lastTop;
             if (topPosPress) {
                 //Moves arm to a position to deposit the freight in the top level
+                currentArmMode = ArmMode.TOP_POS_FFA;
                 backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 backArm.setVelocity(3000);
 //                currentArmMode = ArmMode.TOP_TRAY_POS_MOVE;
-                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(180));
-                foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreArm.setVelocity(700);
-                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(430));
-                foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                foreforeArm.setVelocity(200);
             }
             lastTop = topPos;
 
