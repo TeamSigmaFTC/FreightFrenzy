@@ -55,6 +55,7 @@ public class OpMode2 extends LinearOpMode {
         TOP_TRAY_POS_MOVE,
         TOP_TRAY_POS_MOVE_2,
         TOP_POS_FFA,
+        TOP_POS_FA,
     }
 
     enum DriveMode {
@@ -347,15 +348,20 @@ public class OpMode2 extends LinearOpMode {
                     break;
                 case TOP_POS_FFA: {
                     if (Common.isInPosition(backArm)){
-                        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(180));
-                        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        foreArm.setVelocity(3000);
                         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(103));
                         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         foreforeArm.setVelocity(500);
+                        currentArmMode = ArmMode.TOP_POS_FA;
+                    }
+                    }
+                case TOP_POS_FA: {
+                    if (Common.isInPosition(foreArm)){
+                        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(180));
+                        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        foreArm.setVelocity(3000);
                         currentArmMode = ArmMode.NONE;
                     }
-                    }
+                }
 //                case INTAKE_ARM_BACK_MOVE_3:
 //                    if (Common.isInPosition(backArm) && Common.isInPosition(foreArm)) {
 //                        backArm.setVelocity(0);
