@@ -60,7 +60,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
 
     protected Pose2d startPose = new Pose2d(12, 63, Math.toRadians(-90));
     public static double SHIPPING_HUB_X = -5;
-    public static double SHIPPING_HUB_Y = 57;
+    public static double SHIPPING_HUB_Y = 52;
     public static double SHIPPING_HUB_ANGLE = 70;
     public static double TRANSITION_X = 15;
     public static double TRANSITION_Y = 66;
@@ -160,7 +160,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                 .UNSTABLE_addTemporalMarkerOffset(0.3, () -> intake.setPower(0))
                 .strafeLeft(2)
                 .setTangent(Math.toRadians(180))
-                .splineTo(new Vector2d(5, trajseq4.end().getY() - 10), Math.toRadians(-120))
+                .splineTo(new Vector2d(4, trajseq4.end().getY() - 12.5), Math.toRadians(-120))
                 .build();
         TrajectorySequence trajseq6 = drive.trajectorySequenceBuilder(trajseq5.end())
                 .splineTo(new Vector2d(trajseq4.end().getX(), trajseq4.end().getY()), Math.toRadians(0))
@@ -231,19 +231,19 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         int foreArmDegree;
         int foreforeArmDumpDegree;
         if (tsePos == 1) {
-            backArmDegree = 225;
-            foreArmDegree = 136;
-            foreforeArmDumpDegree = 157;
+            backArmDegree = 221;
+            foreArmDegree = 226;
+            foreforeArmDumpDegree = 22;
             //bottom
         } else if (tsePos == 2) {
-            backArmDegree = 219;
-            foreArmDegree = 117;
-            foreforeArmDumpDegree = 150;
+            backArmDegree = 224;
+            foreArmDegree = 173;
+            foreforeArmDumpDegree = 16;
             //mid
         } else {
             backArmDegree = 180;
-            foreArmDegree = 135;
-            foreforeArmDumpDegree = 200;
+            foreArmDegree = 165;
+            foreforeArmDumpDegree = 11;
             //top
         }
         // start raising arm to drop position
@@ -309,7 +309,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                 // go back to shipping hub
                 drive.followTrajectorySequence(trajseq5);
                 // lift arm and dump
-                backArm.setTargetPosition(Common.backArmAngleToEncoder(170));
+                backArm.setTargetPosition(Common.backArmAngleToEncoder(177));
                 backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 backArm.setVelocity(4000);
 
@@ -317,10 +317,10 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                     drive.update();
                 }
                 backArm.setVelocity(0);
-                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(129));
+                foreArm.setTargetPosition(Common.foreArmAngleToEncoder(179));
                 foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 foreArm.setVelocity(1500);
-                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
+                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(60));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 foreforeArm.setVelocity(800);
                 while (!Common.isInPosition(foreforeArm)) {
@@ -331,7 +331,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                     drive.update();
                 }
                 foreArm.setVelocity(0);
-                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(180));
+                foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(0));
                 foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 foreforeArm.setVelocity(500);
                 while (!Common.isInPosition(foreforeArm)) {
@@ -355,41 +355,37 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         drive.followTrajectorySequenceAsync(trajseq);
 
         // put arm back in
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
-        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(700);
         backArm.setTargetPosition(Common.backArmAngleToEncoder(180));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backArm.setVelocity(3000);
+        backArm.setVelocity(4000);
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(30));
+        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        foreforeArm.setVelocity(700);
 
         while (!Common.isInPosition(foreforeArm) || !Common.isInPosition(backArm)) {
             drive.update();
         }
-        foreforeArm.setVelocity(0);
         backArm.setVelocity(0);
-
-        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(310));
+        foreforeArm.setVelocity(0);
+        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(355));
         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(3000);
+        foreArm.setVelocity(4500);
 
         while (!Common.isInPosition(foreArm)) {
             drive.update();
         }
         foreArm.setVelocity(0);
-
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(-17));
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(205));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(700);
+        foreforeArm.setVelocity(1000);
         while (!Common.isInPosition(foreforeArm)) {
             drive.update();
         }
 
-        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(325));
-        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(4000);
-        backArm.setTargetPosition(Common.backArmAngleToEncoder(218));
+        foreforeArm.setVelocity(0);
+        backArm.setTargetPosition(Common.backArmAngleToEncoder(225));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backArm.setVelocity(3000);
+        backArm.setVelocity(4000);
 
         while (!Common.isInPosition(foreArm)) {
             drive.update();
@@ -405,5 +401,6 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         }
 
     }
+
 }
 
