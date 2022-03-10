@@ -56,6 +56,9 @@ public class AutonomousBlueStorage extends LinearOpMode {
     public static double STORAGE_X = -60;
     public static double STORAGE_Y = 36;
     public static double STORAGE_ANGLE = 0;
+    public static double STORAGE_X2 = -62;
+    public static double STORAGE_ANGLE2 = 180;
+
 
     // Green Range                                      Y      Cr     Cb
 //    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
@@ -124,7 +127,9 @@ public class AutonomousBlueStorage extends LinearOpMode {
         Trajectory traj3 = drive.trajectoryBuilder(traj2.end())
                 .splineTo(new Vector2d(STORAGE_X, STORAGE_Y), Math.toRadians(STORAGE_ANGLE))
                 .build();
-
+        Trajectory traj4 = drive.trajectoryBuilder(traj3.end(), true )
+                .splineTo(new Vector2d(STORAGE_X2, STORAGE_Y), Math.toRadians(STORAGE_ANGLE2))
+                .build();
         waitForStart();
         if (isStopRequested()) return;
         resetStartTime();
@@ -194,7 +199,7 @@ public class AutonomousBlueStorage extends LinearOpMode {
         }
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(60));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(200);
+        foreforeArm.setVelocity(500);
         backArm.setTargetPosition(Common.backArmAngleToEncoder(backArmDegree));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backArm.setVelocity(1000);
@@ -208,14 +213,14 @@ public class AutonomousBlueStorage extends LinearOpMode {
         backArm.setVelocity(0);
         foreArm.setTargetPosition(Common.foreArmAngleToEncoder(foreArmDegree));
         foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(700);
+        foreArm.setVelocity(1000);
         while (!Common.isInPosition(foreArm)){
             sleep(50);
         }
         foreArm.setVelocity(0);
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder( foreforeArmDumpDegree));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(200);
+        foreforeArm.setVelocity(500);
         while (!Common.isInPosition(foreforeArm)){
             sleep(50);
         }
@@ -246,6 +251,7 @@ public class AutonomousBlueStorage extends LinearOpMode {
 
         //park
         drive.followTrajectory(traj3);
+        drive.followTrajectory(traj4);
 
     }
 

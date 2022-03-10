@@ -56,6 +56,8 @@ public class AutonomousRedStorage extends LinearOpMode {
     public static double STORAGE_X = -58;
     public static double STORAGE_Y = -35;
     public static double STORAGE_ANGLE = 0;
+    public static double STORAGE_X2 = -62;
+    public static double STORAGE_ANGLE2 = 180;
 
     // Green Range                                      Y      Cr     Cb
 //    public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 0.0);
@@ -125,7 +127,9 @@ public class AutonomousRedStorage extends LinearOpMode {
                 .splineTo(new Vector2d(-48,-54 ), Math.toRadians(90))
                 .splineTo(new Vector2d(STORAGE_X, STORAGE_Y), Math.toRadians(STORAGE_ANGLE))
                 .build();
-
+        Trajectory traj4 = drive.trajectoryBuilder(traj3.end(), true )
+                .splineTo(new Vector2d(STORAGE_X2, STORAGE_Y), Math.toRadians(STORAGE_ANGLE2))
+                .build();
 
         waitForStart();
         if (isStopRequested()) return;
@@ -256,6 +260,7 @@ public class AutonomousRedStorage extends LinearOpMode {
 
         //park
         drive.followTrajectory(traj3);
+        drive.followTrajectory(traj4);
 
     }
 
