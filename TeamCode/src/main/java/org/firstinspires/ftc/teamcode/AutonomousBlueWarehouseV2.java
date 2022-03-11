@@ -232,8 +232,8 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         int foreforeArmDumpDegree;
         if (tsePos == 1) {
             backArmDegree = 221;
-            foreArmDegree = 226;
-            foreforeArmDumpDegree = 22;
+            foreArmDegree = 220;
+            foreforeArmDumpDegree = 27;
             //bottom
         } else if (tsePos == 2) {
             backArmDegree = 224;
@@ -249,29 +249,29 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         // start raising arm to drop position
         backArm.setTargetPosition(Common.backArmAngleToEncoder(backArmDegree));
         backArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backArm.setVelocity(3500);
-        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(foreArmDegree));
-        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreArm.setVelocity(1200);
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(90));
+        backArm.setVelocity(1000);
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(55));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(800);
-
-        while (!Common.isInPosition(backArm)) {
+        foreforeArm.setVelocity(200);
+        while (!Common.isInPosition(foreforeArm)){
+            sleep(50);
+        }
+        foreforeArm.setVelocity(0);
+        while (!Common.isInPosition(backArm)){
             sleep(50);
         }
         backArm.setVelocity(0);
-        while (!Common.isInPosition(foreArm)) {
+        foreArm.setTargetPosition(Common.foreArmAngleToEncoder(foreArmDegree));
+        foreArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        foreArm.setVelocity(1000);
+        while (!Common.isInPosition(foreArm)){
             sleep(50);
         }
         foreArm.setVelocity(0);
-        while (!Common.isInPosition(foreforeArm)) {
-            sleep(50);
-        }
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(foreforeArmDumpDegree));
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder( foreforeArmDumpDegree));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        foreforeArm.setVelocity(500);
-        while (!Common.isInPosition(foreforeArm)) {
+        foreforeArm.setVelocity(200);
+        while (!Common.isInPosition(foreforeArm)){
             sleep(50);
         }
         sleep(500);

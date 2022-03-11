@@ -171,7 +171,7 @@ public class AutonomousBlueStorage extends LinearOpMode {
 
         //drive to carousel and spin.
         drive.followTrajectory(traj1);
-        spinner.setPower(-1);
+        spinner.setPower(0.9);
         sleep(2500);
         spinner.setPower(0);
 
