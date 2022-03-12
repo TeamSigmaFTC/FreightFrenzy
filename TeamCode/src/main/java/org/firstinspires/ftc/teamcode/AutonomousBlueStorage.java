@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.util.stream.Collectors.toList;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -70,7 +72,6 @@ public class AutonomousBlueStorage extends LinearOpMode {
     public static Scalar scalarLowerYCrCb = new Scalar(0.0, 0.0, 150);
     public static Scalar scalarUpperYCrCb = new Scalar(255.0, 160.0, 255.0);
 
-
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -88,7 +89,6 @@ public class AutonomousBlueStorage extends LinearOpMode {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         //OpenCV Pipeline
-
         pipeline  = new ContourPipeline(0, 0, 0.5, 0);
 
         pipeline.configureScalarLower(scalarLowerYCrCb.val[0], scalarLowerYCrCb.val[1], scalarLowerYCrCb.val[2]);
@@ -130,8 +130,19 @@ public class AutonomousBlueStorage extends LinearOpMode {
         Trajectory traj4 = drive.trajectoryBuilder(traj3.end(), true )
                 .splineTo(new Vector2d(STORAGE_X2, STORAGE_Y), Math.toRadians(STORAGE_ANGLE2))
                 .build();
-        waitForStart();
+
+        // the following replaces waitForStart(), we keep the pipeline running and showing the result
+        while (!isStarted() && !isStopRequested()) {
+            telemetry.addData("heading", Math.round(Math.toDegrees(drive.getPoseEstimate().getHeading())));
+            telemetry.addData("Detected rects", pipeline.getRects().stream().sorted((a,b) -> a.x - b.x).collect(toList()).toString());
+            telemetry.update();
+
+            // Don't burn CPU cycles busy-looping
+            sleep(200);
+        }
+
         if (isStopRequested()) return;
+
         resetStartTime();
         while (getRuntime() < 1) {
             if (pipeline.error) {
@@ -167,6 +178,7 @@ public class AutonomousBlueStorage extends LinearOpMode {
                 break;
             }
         }
+        webcam.stopStreaming();
         telemetry.update();
 
         //drive to carousel and spin.
@@ -218,12 +230,14 @@ public class AutonomousBlueStorage extends LinearOpMode {
             sleep(50);
         }
         foreArm.setVelocity(0);
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder( foreforeArmDumpDegree));
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(foreforeArmDumpDegree));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(500);
         while (!Common.isInPosition(foreforeArm)){
             sleep(50);
         }
+        sleep(500);
+
         //put arm back in
         foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder((int) Common.FORE_FORE_ARM_STARTING_ANGLE));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -249,10 +263,18 @@ public class AutonomousBlueStorage extends LinearOpMode {
         }
         foreArm.setVelocity(0);
 
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder((int) Common.FORE_FORE_ARM_STARTING_ANGLE));
+        foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        foreforeArm.setVelocity(300);
+
         //park
         drive.followTrajectory(traj3);
         drive.followTrajectory(traj4);
 
+        while (!Common.isInPosition(foreforeArm)){
+            sleep(50);
+        }
+        foreforeArm.setVelocity(0);
     }
 
 }

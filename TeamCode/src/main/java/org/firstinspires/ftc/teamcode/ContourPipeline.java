@@ -159,7 +159,7 @@ public class ContourPipeline extends OpenCvPipeline {
 
     public PriorityQueue<Rect> getRects() {
         synchronized (sync) {
-            return rects;
+            return new PriorityQueue(rects);
         }
     }
 

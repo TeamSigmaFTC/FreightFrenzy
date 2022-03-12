@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.util.stream.Collectors.toList;
+
 import android.graphics.Color;
 
 import androidx.annotation.NonNull;
@@ -172,7 +174,15 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
             telemetry.addData("WARNING", "Arms NOT in position!");
         }
         telemetry.update();
-        waitForStart();
+        // the following replaces waitForStart(), we keep the pipeline running and showing the result
+        while (!isStarted() && !isStopRequested()) {
+            telemetry.addData("heading", Math.round(Math.toDegrees(drive.getPoseEstimate().getHeading())));
+            telemetry.addData("Detected rects", pipeline.getRects().stream().sorted((a,b) -> a.x - b.x).collect(toList()).toString());
+            telemetry.update();
+
+            // Don't burn CPU cycles busy-looping
+            sleep(200);
+        }
 
         drive.setPoseEstimate(startPose);
         if (drive.t265 != null) {
@@ -186,7 +196,6 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        resetStartTime();
         resetStartTime();
         while (getRuntime() < 1) {
             if (pipeline.error) {
@@ -222,6 +231,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
                 break;
             }
         }
+        webcam.stopStreaming();
         telemetry.update();
 
         //drive to TSH and drop freight
@@ -268,7 +278,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
             sleep(50);
         }
         foreArm.setVelocity(0);
-        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder( foreforeArmDumpDegree));
+        foreforeArm.setTargetPosition(Common.foreforeArmAngleToEncoder(foreforeArmDumpDegree));
         foreforeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         foreforeArm.setVelocity(200);
         while (!Common.isInPosition(foreforeArm)){

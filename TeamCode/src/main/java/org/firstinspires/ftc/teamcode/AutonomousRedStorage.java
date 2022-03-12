@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.util.stream.Collectors.toList;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -131,7 +133,16 @@ public class AutonomousRedStorage extends LinearOpMode {
                 .splineTo(new Vector2d(STORAGE_X2, STORAGE_Y), Math.toRadians(STORAGE_ANGLE2))
                 .build();
 
-        waitForStart();
+        // the following replaces waitForStart(), we keep the pipeline running and showing the result
+        while (!isStarted() && !isStopRequested()) {
+            telemetry.addData("heading", Math.round(Math.toDegrees(drive.getPoseEstimate().getHeading())));
+            telemetry.addData("Detected rects", pipeline.getRects().stream().sorted((a,b) -> a.x - b.x).collect(toList()).toString());
+            telemetry.update();
+
+            // Don't burn CPU cycles busy-looping
+            sleep(200);
+        }
+
         if (isStopRequested()) return;
 
         resetStartTime();
@@ -169,6 +180,7 @@ public class AutonomousRedStorage extends LinearOpMode {
                 break;
             }
         }
+        webcam.stopStreaming();
         telemetry.update();
 
         //drive to carousel and spin.

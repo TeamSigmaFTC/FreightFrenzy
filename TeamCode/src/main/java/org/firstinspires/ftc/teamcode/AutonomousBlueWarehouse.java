@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.util.stream.Collectors.toList;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -120,10 +122,19 @@ public class AutonomousBlueWarehouse extends LinearOpMode {
                 .splineTo(new Vector2d(WAREHOUSE_X, WAREHOUSE_Y), Math.toRadians(WAREHOUSE_ANGLE))
                 .build();
 
-        waitForStart();
+        // the following replaces waitForStart(), we keep the pipeline running and showing the result
+        while (!isStarted() && !isStopRequested()) {
+            telemetry.addData("heading", Math.round(Math.toDegrees(drive.getPoseEstimate().getHeading())));
+            telemetry.addData("Detected rects", pipeline.getRects().stream().sorted((a,b) -> a.x - b.x).collect(toList()).toString());
+            telemetry.update();
+
+            // Don't burn CPU cycles busy-looping
+            sleep(200);
+        }
+
         if (isStopRequested()) return;
-        //getRuntime() < 2
-        while (true) {
+        resetStartTime();
+        while (getRuntime() < 1) {
             if (pipeline.error) {
                 telemetry.addData("Exception: ", pipeline.debug.getStackTrace());
             }
@@ -150,6 +161,7 @@ public class AutonomousBlueWarehouse extends LinearOpMode {
                 }
             }
         }
+        webcam.stopStreaming();
         telemetry.update();
 
         //drive to TSH and drop freight

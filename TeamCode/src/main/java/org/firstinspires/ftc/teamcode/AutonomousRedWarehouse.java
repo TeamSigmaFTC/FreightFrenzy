@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.util.stream.Collectors.toList;
+
 import android.graphics.Color;
 
 import androidx.annotation.NonNull;
@@ -170,7 +172,16 @@ public class AutonomousRedWarehouse extends LinearOpMode {
             telemetry.addData("WARNING", "Arms NOT in position!");
         }
         telemetry.update();
-        waitForStart();
+
+        // the following replaces waitForStart(), we keep the pipeline running and showing the result
+        while (!isStarted() && !isStopRequested()) {
+            telemetry.addData("heading", Math.round(Math.toDegrees(drive.getPoseEstimate().getHeading())));
+            telemetry.addData("Detected rects", pipeline.getRects().stream().sorted((a,b) -> a.x - b.x).collect(toList()).toString());
+            telemetry.update();
+
+            // Don't burn CPU cycles busy-looping
+            sleep(200);
+        }
 
         drive.setPoseEstimate(startPose);
         if (drive.t265 != null) {
@@ -219,6 +230,7 @@ public class AutonomousRedWarehouse extends LinearOpMode {
                 break;
             }
         }
+        webcam.stopStreaming();
         telemetry.update();
 
         //drive to TSH and drop freight
