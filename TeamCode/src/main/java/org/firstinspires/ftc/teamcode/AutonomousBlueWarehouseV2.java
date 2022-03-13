@@ -248,7 +248,7 @@ public class AutonomousBlueWarehouseV2 extends LinearOpMode {
         } else if (tsePos == 2) {
             backArmDegree = 224;
             foreArmDegree = 173;
-            foreforeArmDumpDegree = 16;
+            foreforeArmDumpDegree = 25;
             //mid
         } else {
             backArmDegree = 180;

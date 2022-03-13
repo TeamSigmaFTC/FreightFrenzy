@@ -290,7 +290,7 @@ public class AutonomousRedWarehouse extends LinearOpMode {
         followTrajectoryAndPutArmBackIn(trajseq3);
         int cycle = 0;
 
-        while (cycle < 1) {
+        while (cycle < 2) {
             cycle = cycle + 1;
             // inch forward to pickup freight
             drive.followTrajectorySequenceAsync(trajseq4);
@@ -309,6 +309,9 @@ public class AutonomousRedWarehouse extends LinearOpMode {
                     blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.WHITE);
                     intakeSuccess = true;
                 }
+            }
+            if (cycle == 2){
+                break;
             }
 
             if (intakeSuccess) {
